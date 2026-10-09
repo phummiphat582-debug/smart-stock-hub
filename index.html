@@ -11,6 +11,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Stock Hub">
 
+  <!-- PWA Icons & Manifest -->
+  <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.json">
+
   <!-- Icons & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,13 +93,49 @@
     .brand-icon {
       width: 40px;
       height: 40px;
-      background: linear-gradient(135deg, #3b82f6, #10b981);
       border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+      overflow: hidden;
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .pwa-install-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+      padding: 12px 18px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 9990;
+      max-width: 92%;
+      width: 440px;
+      animation: slideUpFade 0.3s ease;
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    @media (max-width: 860px) {
+      .pwa-install-bar {
+        bottom: 72px; /* stay above mobile bottom bar */
+      }
     }
 
     .brand-info h1 {
@@ -815,7 +857,9 @@
   <!-- Top Navigation Header -->
   <header class="app-header">
     <div class="brand-group" onclick="switchView('dashboard')">
-      <div class="brand-icon">⚡</div>
+      <div class="brand-icon">
+        <img src="./icon-192.png" alt="Smart Stock Hub" class="brand-logo-img">
+      </div>
       <div class="brand-info">
         <h1>Smart Stock Hub <span class="brand-badge">PRO REALTIME</span></h1>
         <p>ระบบสต็อกและเบิกจ่ายกิจกรรมออนไลน์</p>
@@ -828,6 +872,11 @@
         <span class="pulse-dot online" id="pulseDot"></span>
         <span id="connText">ออนไลน์ เรียลไทม์</span>
       </div>
+
+      <!-- PWA Install Button -->
+      <button class="btn btn-success btn-sm" id="btnInstallApp" onclick="triggerPWAInstall()" style="display: none;" title="ติดตั้งแอปลงเครื่อง">
+        <span>📲</span> ติดตั้งแอป
+      </button>
 
       <!-- Quick Issue button -->
       <button class="btn btn-primary btn-sm hide-sm" onclick="switchView('issue')">
@@ -881,6 +930,12 @@
         <div class="nav-link" data-view="history" onclick="switchView('history')">
           <span class="nav-icon">📜</span>
           <span>ประวัติการเบิกจ่าย</span>
+        </div>
+
+        <div class="menu-header">แอปพลิเคชัน</div>
+        <div class="nav-link" id="sidebarInstallBtn" onclick="triggerPWAInstall()" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399;">
+          <span class="nav-icon">📲</span>
+          <span>ติดตั้งแอปลงเครื่อง</span>
         </div>
       </div>
 
@@ -1394,7 +1449,53 @@
     </div>
   </nav>
 
+  <!-- PWA Floating Quick Install Bar -->
+  <div id="pwaFloatingBanner" class="pwa-install-bar" style="display: none;">
+    <img src="./icon-192.png" alt="Logo" style="width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-weight: 700; font-size: 13.5px; color: #ffffff;">ติดตั้ง Smart Stock Hub</div>
+      <div style="font-size: 11px; color: #94a3b8; margin-top: 1px;">เปิดใช้งานแบบเต็มจอ โหลดเร็ว ไม่ต้องพิมพ์เว็บ</div>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="btn btn-success btn-sm" onclick="triggerPWAInstall()">ติดตั้ง</button>
+      <button class="icon-btn" onclick="dismissInstallBanner()" style="width: 28px; height: 28px; font-size: 13px;" title="ปิด">✕</button>
+    </div>
+  </div>
+
   <!-- ================= MODALS ================= -->
+
+  <!-- Modal iOS PWA Install Guide -->
+  <div class="modal-overlay" id="modalIosInstall">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 10px;">
+          <img src="./icon-192.png" style="width: 30px; height: 30px; border-radius: 8px;">
+          วิธีติดตั้งบน iPhone / iPad (iOS)
+        </h3>
+        <button class="modal-close" onclick="closeModal('modalIosInstall')">✕</button>
+      </div>
+      <div class="modal-body" style="font-size: 13.5px; line-height: 1.6;">
+        <p style="margin-bottom: 16px; color: var(--text-muted);">
+          ติดตั้งเป็นแอปบนหน้าจอมือถือ เพื่อเปิดใช้งานสะดวกรวดเร็วเสมือนแอปจริง:
+        </p>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 26px;">1️⃣</div>
+          <div>เปิดเว็บนี้ใน Safari แล้วแตะปุ่ม <strong>แชร์ (Share)</strong> <span style="font-size: 18px;">⬆️</span> ที่แถบด้านล่าง</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 26px;">2️⃣</div>
+          <div>เลื่อนลงมาแล้วแตะเลือก <strong>"เพิ่มไปยังหน้าจอโฮม"</strong> (Add to Home Screen) <span style="font-size: 18px;">➕</span></div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 26px;">3️⃣</div>
+          <div>แตะคำว่า <strong>"เพิ่ม" (Add)</strong> มุมขวาบน จะมีไอคอน Smart Stock Hub ปรากฏบนหน้าจอมือถือทันที 🎉</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closeModal('modalIosInstall')">เข้าใจแล้ว ✔</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Edit Item Modal -->
   <div class="modal-overlay" id="modalEditItem">
@@ -2912,7 +3013,69 @@
     }
 
     /* ==========================================================
-       13. INITIALIZATION & PWA SERVICE WORKER
+       13. PWA INSTALLATION SYSTEM
+       ========================================================== */
+    let deferredInstallPrompt = null;
+    const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      showPWAInstallUI();
+    });
+
+    function showPWAInstallUI() {
+      if (isStandalone()) return;
+      const btn = document.getElementById('btnInstallApp');
+      const sideBtn = document.getElementById('sidebarInstallBtn');
+      const banner = document.getElementById('pwaFloatingBanner');
+      if (btn) btn.style.display = 'inline-flex';
+      if (sideBtn) sideBtn.style.display = 'flex';
+      if (banner && localStorage.getItem('dismissed_pwa_banner') !== 'true') {
+        banner.style.display = 'flex';
+      }
+    }
+
+    async function triggerPWAInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          showToast('กำลังติดตั้ง Smart Stock Hub ลงเครื่อง... 📲', 'success');
+        }
+        deferredInstallPrompt = null;
+        hidePWAInstallUI();
+      } else if (isIos()) {
+        openModal('modalIosInstall');
+      } else {
+        showToast('สามารถแตะที่เมนูเบราว์เซอร์ (⋮) แล้วเลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"', 'info');
+      }
+    }
+
+    function dismissInstallBanner() {
+      const banner = document.getElementById('pwaFloatingBanner');
+      if (banner) banner.style.display = 'none';
+      localStorage.setItem('dismissed_pwa_banner', 'true');
+    }
+
+    window.addEventListener('appinstalled', () => {
+      hidePWAInstallUI();
+      showToast('ติดตั้ง Smart Stock Hub ลงเครื่องเรียบร้อยแล้ว! 📲', 'success');
+      playBeep('success');
+    });
+
+    function hidePWAInstallUI() {
+      const btn = document.getElementById('btnInstallApp');
+      const sideBtn = document.getElementById('sidebarInstallBtn');
+      const banner = document.getElementById('pwaFloatingBanner');
+      if (btn) btn.style.display = 'none';
+      if (sideBtn) sideBtn.style.display = 'none';
+      if (banner) banner.style.display = 'none';
+    }
+
+    /* ==========================================================
+       14. INITIALIZATION & PWA SERVICE WORKER
        ========================================================== */
     document.addEventListener('DOMContentLoaded', () => {
       // Set today's date on all date inputs
@@ -2924,6 +3087,18 @@
 
       // Update sound toggle icon
       document.getElementById('btnSoundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+
+      // Check if iOS or show install button if not installed
+      if (!isStandalone()) {
+        const sideBtn = document.getElementById('sidebarInstallBtn');
+        const btn = document.getElementById('btnInstallApp');
+        if (sideBtn) sideBtn.style.display = 'flex';
+        if (btn) btn.style.display = 'inline-flex';
+        if (isIos() && localStorage.getItem('dismissed_pwa_banner') !== 'true') {
+          const banner = document.getElementById('pwaFloatingBanner');
+          if (banner) banner.style.display = 'flex';
+        }
+      }
 
       // Drag and drop CSV listeners
       const csvDrop = document.getElementById('csvDropZone');
@@ -2944,7 +3119,9 @@
 
       // Register Service Worker for offline PWA
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('Smart Stock Hub SW registered:', reg.scope);
+        }).catch(err => {
           console.log('SW registration note:', err);
         });
       }
