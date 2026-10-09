@@ -1,0 +1,2954 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Smart Stock Hub - ระบบจัดการสต็อกและเบิกจ่ายกิจกรรมออนไลน์ เรียลไทม์</title>
+  <meta name="description" content="ระบบจัดการสต็อกและเบิกจ่ายอุปกรณ์กิจกรรมอัจฉริยะ อัปเดตข้อมูลออนไลน์เรียลไทม์ รองรับมือถือและคอมพิวเตอร์">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Stock Hub">
+
+  <!-- Icons & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-subtle: #eff6ff;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #ffffff;
+      --border: #e2e8f0;
+      --border-subtle: #f1f5f9;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.04);
+      --shadow-lg: 0 12px 28px -4px rgb(0 0 0 / 0.12), 0 4px 10px -2px rgb(0 0 0 / 0.06);
+      --sidebar-w: 240px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 14px;
+    }
+
+    /* Top Navbar */
+    header.app-header {
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #ffffff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      height: 64px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-info h1 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-info p {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sync-status:hover { background: rgba(255, 255, 255, 0.16); }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      position: relative;
+    }
+    .pulse-dot.online {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulseGreen 2s infinite;
+    }
+    .pulse-dot.offline {
+      background: #f59e0b;
+      box-shadow: none;
+      animation: none;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+
+    /* App Container Layout */
+    .app-layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* Sidebar */
+    .app-sidebar {
+      width: var(--sidebar-w);
+      background: #0b1329;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      transition: width 0.2s;
+    }
+
+    .sidebar-menu {
+      padding: 16px 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+
+    .menu-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      padding: 10px 10px 4px 10px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .nav-link .nav-icon {
+      font-size: 18px;
+      width: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-pill {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+    }
+
+    .sidebar-foot {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Main Content Area */
+    .app-main {
+      flex: 1;
+      padding: 24px;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
+    }
+
+    /* Views */
+    .view-container {
+      display: none;
+      animation: fadeIn 0.25s ease forwards;
+    }
+    .view-container.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Page Header */
+    .view-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .view-title h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .view-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .view-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    }
+    .btn-success:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover {
+      background: var(--border-subtle);
+      border-color: #cbd5e1;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    .btn-danger {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+    .btn-danger:hover { background: #fca5a5; color: #991b1b; }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Stat KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .kpi-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .kpi-info { flex: 1; min-width: 0; }
+    .kpi-title { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+    .kpi-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1.1; }
+    .kpi-sub { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+
+    /* Alert Banner */
+    .alert-banner {
+      display: none;
+      background: linear-gradient(90deg, #fffbeb, #fef3c7);
+      border: 1px solid #fde68a;
+      border-left: 5px solid var(--warning);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .alert-banner.show { display: flex; }
+    .alert-banner-left { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #92400e; }
+
+    /* Forms & Inputs */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-control {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text);
+      font-size: 14px;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    textarea.form-control {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .input-hint {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    table.data-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+    }
+
+    table.data-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    table.data-table tr:last-child td { border-bottom: none; }
+    table.data-table tr:hover td { background: #f8fafc; }
+
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* Badges & Tags */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-ok { background: #dcfce7; color: #15803d; }
+    .badge-low { background: #fef3c7; color: #b45309; }
+    .badge-out { background: #fee2e2; color: #b91c1c; }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+
+    /* Image Drop & Thumbnails */
+    .drop-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .img-preview-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .img-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .img-thumb-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .thumb-del {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Modal / Popups */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
+
+    .modal-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 17px; font-weight: 700; color: var(--text); }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close:hover { background: #f1f5f9; color: var(--text); }
+
+    .modal-body { padding: 22px; }
+    .modal-footer {
+      padding: 16px 22px;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    /* Toast Notification */
+    .toast-tray {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: #1e293b;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 260px;
+      animation: slideInRight 0.2s ease forwards;
+      border-left: 4px solid var(--primary);
+    }
+    .toast.success { border-left-color: #10b981; }
+    .toast.error { border-left-color: #ef4444; }
+    .toast.warning { border-left-color: #f59e0b; }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Mobile Bottom Navigation */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0f172a;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      padding: 6px 10px;
+      justify-content: space-around;
+    }
+
+    .mobile-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 10px;
+      padding: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+    }
+    .mobile-tab.active { color: #60a5fa; font-weight: 600; }
+    .mobile-tab .m-icon { font-size: 18px; }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .app-sidebar { display: none; }
+      .mobile-nav { display: flex; }
+      .app-main { padding: 14px 14px 80px 14px; }
+      .brand-info p { display: none; }
+      .header-actions .hide-sm { display: none; }
+    }
+
+    /* Print Styles */
+    @media print {
+      header.app-header, .app-sidebar, .mobile-nav, .view-actions, .no-print, .toast-tray { display: none !important; }
+      body, .app-main { background: white !important; padding: 0 !important; color: black !important; }
+      .card { border: none !important; box-shadow: none !important; padding: 0 !important; }
+    }
+
+    /* Summary Matrix Box */
+    .summary-boxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .sum-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .sum-box .sum-num { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .sum-box .sum-txt { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Quick Stock adjust buttons */
+    .quick-qty-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      transition: all 0.1s;
+    }
+    .quick-qty-btn:hover { background: #e2e8f0; }
+
+    /* Item Thumbnail on Table */
+    .table-item-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand-group" onclick="switchView('dashboard')">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-info">
+        <h1>Smart Stock Hub <span class="brand-badge">PRO REALTIME</span></h1>
+        <p>ระบบสต็อกและเบิกจ่ายกิจกรรมออนไลน์</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Live Sync status badge -->
+      <div class="sync-status" id="connStatusBadge" onclick="openModal('modalSettings')" title="คลิกเพื่อดูสถานะคลาวด์">
+        <span class="pulse-dot online" id="pulseDot"></span>
+        <span id="connText">ออนไลน์ เรียลไทม์</span>
+      </div>
+
+      <!-- Quick Issue button -->
+      <button class="btn btn-primary btn-sm hide-sm" onclick="switchView('issue')">
+        <span>📤</span> เบิกของด่วน
+      </button>
+
+      <!-- Sound toggle -->
+      <button class="icon-btn" id="btnSoundToggle" onclick="toggleSound()" title="เปิด/ปิดเสียงเอฟเฟกต์">
+        🔊
+      </button>
+
+      <!-- Settings -->
+      <button class="icon-btn" onclick="openModal('modalSettings')" title="ตั้งค่าระบบ">
+        ⚙️
+      </button>
+    </div>
+  </header>
+
+  <!-- Layout Frame -->
+  <div class="app-layout">
+    
+    <!-- Sidebar for Desktop -->
+    <aside class="app-sidebar">
+      <div class="sidebar-menu">
+        <div class="menu-header">แดชบอร์ด & ภาพรวม</div>
+        <div class="nav-link active" data-view="dashboard" onclick="switchView('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>ภาพรวม (Dashboard)</span>
+        </div>
+
+        <div class="menu-header">คลังสินค้า</div>
+        <div class="nav-link" data-view="inventory" onclick="switchView('inventory')">
+          <span class="nav-icon">📦</span>
+          <span>รายการสต็อกคงเหลือ</span>
+          <span class="nav-pill" id="lowStockPill" style="display: none;">0</span>
+        </div>
+        <div class="nav-link" data-view="stockin" onclick="switchView('stockin')">
+          <span class="nav-icon">➕</span>
+          <span>รับเข้า / เพิ่มสินค้า</span>
+        </div>
+        <div class="nav-link" data-view="import" onclick="switchView('import')">
+          <span class="nav-icon">📂</span>
+          <span>นำเข้า CSV</span>
+        </div>
+
+        <div class="menu-header">การเบิกจ่าย</div>
+        <div class="nav-link" data-view="issue" onclick="switchView('issue')">
+          <span class="nav-icon">📤</span>
+          <span>เบิกใช้อุปกรณ์</span>
+        </div>
+        <div class="nav-link" data-view="history" onclick="switchView('history')">
+          <span class="nav-icon">📜</span>
+          <span>ประวัติการเบิกจ่าย</span>
+        </div>
+      </div>
+
+      <div class="sidebar-foot">
+        <span>⚡ Cloud Realtime Sync</span>
+        <span id="versionTag">v2.5</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+
+      <!-- ================= 1. DASHBOARD VIEW ================= -->
+      <section id="view-dashboard" class="view-container active">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>📊 ภาพรวมระบบคลัง & ยอดการเบิก</h2>
+            <p>ติดตามสถานะสต็อกแบบเรียลไทม์ พร้อมสรุปข้อมูลรายวันและรายเดือน</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="printReport()">🖨️ พิมพ์รายงาน</button>
+            <button class="btn btn-primary btn-sm" onclick="switchView('issue')">📤 ทำรายการเบิก</button>
+          </div>
+        </div>
+
+        <!-- Low Stock Warning Banner -->
+        <div id="lowStockBanner" class="alert-banner">
+          <div class="alert-banner-left">
+            <span>⚠️</span>
+            <span id="lowStockBannerMsg">มีสินค้าใกล้หมดสต็อก กรุณาตรวจสอบ</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="filterLowStockView()">ดูรายการใกล้หมด</button>
+        </div>
+
+        <!-- KPI Summary Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;">📦</div>
+            <div class="kpi-info">
+              <div class="kpi-title">รายการสินค้าทั้งหมด</div>
+              <div class="kpi-value" id="kpiTotalItems">0</div>
+              <div class="kpi-sub">รายการในระบบ</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #f0fdf4; color: #16a34a;">🔢</div>
+            <div class="kpi-info">
+              <div class="kpi-title">ยอดคงเหลือรวม</div>
+              <div class="kpi-value" id="kpiTotalQty">0</div>
+              <div class="kpi-sub">ชิ้นทั้งหมดในคลัง</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fefce8; color: #ca8a04;">💰</div>
+            <div class="kpi-info">
+              <div class="kpi-title">มูลค่าสต็อกรวม (บาท)</div>
+              <div class="kpi-value" id="kpiTotalValue">฿0.00</div>
+              <div class="kpi-sub">คำนวณจากราคาต่อหน่วย</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fef2f2; color: #dc2626;">⚠️</div>
+            <div class="kpi-info">
+              <div class="kpi-title">สินค้าใกล้หมด/หมด</div>
+              <div class="kpi-value" id="kpiLowStock" style="color: #dc2626;">0</div>
+              <div class="kpi-sub">ต่ำกว่าเกณฑ์แจ้งเตือน</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fdf4ff; color: #9333ea;">📤</div>
+            <div class="kpi-info">
+              <div class="kpi-title">ยอดเบิกเดือนนี้</div>
+              <div class="kpi-value" id="kpiMonthIssues">0</div>
+              <div class="kpi-sub">จำนวนครั้งการเบิก</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background: #f0fdfa; color: #0d9488;">📅</div>
+            <div class="kpi-info">
+              <div class="kpi-title">ยอดเบิกวันนี้</div>
+              <div class="kpi-value" id="kpiTodayIssues">0</div>
+              <div class="kpi-sub">ความเคลื่อนไหววันนี้</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 15px; font-weight: 700;">📈 สถิติการเบิกใช้อุปกรณ์ 12 เดือนล่าสุด</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">อัปเดตอัตโนมัติ</span>
+          </div>
+          <div style="height: 260px; width: 100%;">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Issue Summary Analysis -->
+        <div class="card">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <h3 style="font-size: 15px; font-weight: 700;">📋 รายงานสรุปยอดการเบิกจ่าย</h3>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-sm" id="btnSumToday" onclick="loadSummaryMode('today')">📅 วันนี้</button>
+              <button class="btn btn-outline btn-sm" id="btnSumMonth" onclick="loadSummaryMode('month')">🗓️ เดือนนี้</button>
+              <button class="btn btn-outline btn-sm" id="btnSumCustom" onclick="toggleCustomMonthPicker()">📆 เลือกเดือน</button>
+              <button class="btn btn-outline btn-sm" onclick="exportSummaryCSV()">⬇️ Export CSV</button>
+            </div>
+          </div>
+
+          <div id="customMonthSelector" style="display: none; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border);">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <label style="font-size: 12px; font-weight: 600;">เลือกเดือน/ปี:</label>
+              <select id="selSumMonth" class="form-control" style="width: 140px;"></select>
+              <select id="selSumYear" class="form-control" style="width: 110px;"></select>
+              <button class="btn btn-primary btn-sm" onclick="applyCustomMonthSummary()">ดูข้อมูล</button>
+            </div>
+          </div>
+
+          <div id="summaryContentArea">
+            <div class="summary-boxes" id="summaryKpiBoxes"></div>
+
+            <h4 style="font-size: 13.5px; font-weight: 600; margin: 16px 0 8px 0; color: #475569;">อุปกรณ์ที่เบิกสูงสุดในงวดนี้</h4>
+            <div class="table-container" style="margin-bottom: 16px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ชื่ออุปกรณ์</th>
+                    <th class="text-right">จำนวนรวมที่เบิก (ชิ้น)</th>
+                    <th class="text-right">จำนวนครั้งที่เบิก</th>
+                  </tr>
+                </thead>
+                <tbody id="sumByItemTableBody">
+                  <tr><td colspan="3" class="text-center" style="color: var(--text-muted); padding: 20px;">กำลังประมวลผลข้อมูล...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 style="font-size: 13.5px; font-weight: 600; margin: 16px 0 8px 0; color: #475569;">รายการบันทึกการเบิกทั้งหมดในงวดนี้</h4>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>วันที่ / เวลา</th>
+                    <th>ชื่ออุปกรณ์</th>
+                    <th class="text-right">จำนวน</th>
+                    <th>ผู้เบิก</th>
+                    <th>วัตถุประสงค์ / หมายเหตุ</th>
+                  </tr>
+                </thead>
+                <tbody id="sumAllEntriesTableBody">
+                  <tr><td colspan="5" class="text-center" style="color: var(--text-muted); padding: 20px;">ไม่มีข้อมูลการเบิกในช่วงเวลานี้</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. INVENTORY VIEW ================= -->
+      <section id="view-inventory" class="view-container">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>📦 รายการสต็อกคงเหลือ</h2>
+            <p>ค้นหา ตรวจสอบจำนวนคงเหลือ และจัดการข้อมูลสินค้าในคลัง</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="exportStockCSV()">⬇️ Export CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="switchView('stockin')">➕ เพิ่มสินค้าใหม่</button>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="card" style="padding: 14px 18px; margin-bottom: 16px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 220px; position: relative;">
+              <input type="text" id="inventorySearchInput" class="form-control" placeholder="🔍 ค้นหาชื่อสินค้า, หมวดหมู่, หรือรหัส..." oninput="renderInventoryTable()">
+            </div>
+            <div style="width: 170px;">
+              <select id="inventoryStatusFilter" class="form-control" onchange="renderInventoryTable()">
+                <option value="all">สถานะทั้งหมด</option>
+                <option value="low">ใกล้หมด / ต่ำกว่าเกณฑ์ ⚠️</option>
+                <option value="out">หมดสต็อก ❌</option>
+                <option value="ok">สต็อกเพียงพอ ✅</option>
+              </select>
+            </div>
+            <div style="width: 160px;">
+              <select id="inventoryCategoryFilter" class="form-control" onchange="renderInventoryTable()">
+                <option value="all">ทุกหมวดหมู่</option>
+                <option value="กิจกรรมทั่วไป">กิจกรรมทั่วไป</option>
+                <option value="ยานพาหนะ ATV">ยานพาหนะ ATV</option>
+                <option value="วัสดุสิ้นเปลือง">วัสดุสิ้นเปลือง</option>
+                <option value="เครื่องมือซ่อม">เครื่องมือซ่อม</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory Data Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">รูป</th>
+                <th>ชื่อสินค้า / อุปกรณ์</th>
+                <th>หมวดหมู่</th>
+                <th class="text-right">คงเหลือ</th>
+                <th class="text-right">ราคา/หน่วย</th>
+                <th class="text-right">มูลค่ารวม</th>
+                <th class="text-right">เตือนเมื่อ ≤</th>
+                <th>สถานะ</th>
+                <th class="text-center">ปรับด่วน</th>
+                <th class="text-center">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <tr><td colspan="10" class="text-center" style="padding: 30px; color: var(--text-muted);">กำลังโหลดข้อมูลสต็อก...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 3. STOCK IN / ADD VIEW ================= -->
+      <section id="view-stockin" class="view-container">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>➕ รับเข้าสต็อก / เพิ่มสินค้าใหม่</h2>
+            <p>บันทึกการเพิ่มจำนวนสต็อกเดิม หรือสร้างสินค้าใหม่เข้าระบบ</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="clearStockInForm()">ล้างข้อมูลฟอร์ม</button>
+          </div>
+        </div>
+
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+          <form id="formStockIn" onsubmit="handleSaveStockItem(event)">
+            <div class="form-grid">
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>ชื่อสินค้า / อุปกรณ์ <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="addName" class="form-control" list="existingItemsDatalist" placeholder="พิมพ์ชื่ออุปกรณ์ (หากตรงกับของเดิม ระบบจะช่วยเติมข้อมูล)" required oninput="checkExistingItemName()">
+                <datalist id="existingItemsDatalist"></datalist>
+                <span id="nameExistingNotice" style="font-size: 12px; color: var(--primary); font-weight: 500;"></span>
+              </div>
+
+              <div class="form-group">
+                <label>หมวดหมู่อุปกรณ์</label>
+                <select id="addCategory" class="form-control">
+                  <option value="กิจกรรมทั่วไป">กิจกรรมทั่วไป</option>
+                  <option value="ยานพาหนะ ATV">ยานพาหนะ ATV</option>
+                  <option value="วัสดุสิ้นเปลือง">วัสดุสิ้นเปลือง</option>
+                  <option value="เครื่องมือซ่อม">เครื่องมือซ่อม</option>
+                  <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>จำนวนที่รับเข้า <span style="color: var(--danger);">*</span></label>
+                <input type="number" id="addQty" class="form-control" min="1" step="1" placeholder="ระบุจำนวน เช่น 10" required>
+              </div>
+
+              <div class="form-group">
+                <label>ราคาต่อหน่วย (บาท)</label>
+                <input type="number" id="addPrice" class="form-control" min="0" step="0.25" placeholder="เช่น 150">
+              </div>
+
+              <div class="form-group">
+                <label>แจ้งเตือนเมื่อคงเหลือ ≤ (ชิ้น)</label>
+                <input type="number" id="addThreshold" class="form-control" min="0" step="1" value="5" placeholder="เช่น 5">
+              </div>
+
+              <div class="form-group">
+                <label>วันที่รับเข้า</label>
+                <input type="date" id="addDate" class="form-control" required>
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>หมายเหตุ / แหล่งที่มา / เลขที่บิล</label>
+                <textarea id="addNote" class="form-control" placeholder="ระบุรายละเอียดเพิ่มเติม เช่น ซื้อจากร้านอะไหล่, สั่งเพิ่มรอบกิจกรรมวันหยุด"></textarea>
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>รูปภาพสินค้า (อัปโหลดได้หลายรูป)</label>
+                <div class="drop-zone" onclick="document.getElementById('addImgFileInput').click()">
+                  <div style="font-size: 28px; margin-bottom: 6px;">📷</div>
+                  <div style="font-weight: 600; color: #475569;">คลิกเพื่อเลือกรูป หรือลากรูปมาวางที่นี่</div>
+                  <div style="font-size: 11px; color: var(--text-light); margin-top: 4px;">รองรับ JPG, PNG, WEBP บีบอัดอัตโนมัติ</div>
+                  <input type="file" id="addImgFileInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelection(event, 'add')">
+                </div>
+                <div class="img-preview-grid" id="addImgPreviewArea"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+              <button type="button" class="btn btn-outline" onclick="clearStockInForm()">ล้างฟอร์ม</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitStockIn">💾 บันทึกรับเข้าสต็อก</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================= 4. ISSUE / WITHDRAW VIEW ================= -->
+      <section id="view-issue" class="view-container">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>📤 ทำรายการเบิกใช้อุปกรณ์</h2>
+            <p>ตัดสต็อกสินค้า พร้อมระบุผู้เบิกและวัตถุประสงค์การใช้งาน</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="switchView('history')">📜 ดูประวัติการเบิก</button>
+          </div>
+        </div>
+
+        <div class="card" style="max-width: 760px; margin: 0 auto;">
+          <form id="formIssue" onsubmit="handleSaveIssue(event)">
+            <div class="form-grid">
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>เลือกอุปกรณ์ที่ต้องการเบิก <span style="color: var(--danger);">*</span></label>
+                <select id="issueItemSelect" class="form-control" required onchange="onIssueItemChange()">
+                  <option value="">-- กรุณาเลือกอุปกรณ์ในสต็อก --</option>
+                </select>
+              </div>
+
+              <!-- Available stock callout -->
+              <div id="issueStockCallout" style="grid-column: 1 / -1; display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 600; color: #166534;" id="issueCalloutTitle">อุปกรณ์: -</span>
+                  <span style="font-weight: 700; font-size: 15px; color: #15803d;" id="issueCalloutQty">คงเหลือ: 0 ชิ้น</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>จำนวนที่ต้องการเบิก <span style="color: var(--danger);">*</span></label>
+                <input type="number" id="issueQty" class="form-control" min="1" step="1" placeholder="ระบุจำนวน" required oninput="calculateIssueRemaining()">
+                <!-- Quick quantity presets -->
+                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="setIssuePresetQty(1)">+1</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="setIssuePresetQty(2)">+2</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="setIssuePresetQty(5)">+5</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="setIssuePresetQty(10)">+10</button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="setIssuePresetMax()">ทั้งหมด</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>คงเหลือหลังเบิก</label>
+                <input type="text" id="issueRemainingPreview" class="form-control" disabled value="-" style="background: #e2e8f0; font-weight: 700;">
+              </div>
+
+              <div class="form-group">
+                <label>ชื่อผู้เบิก / ฝ่ายที่เบิก <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="issueRecipient" class="form-control" list="recipientsDatalist" placeholder="เช่น ทีมไกด์ ATV, ช่างบอย, แม่บ้าน" required>
+                <datalist id="recipientsDatalist"></datalist>
+              </div>
+
+              <div class="form-group">
+                <label>วันที่เบิก</label>
+                <input type="date" id="issueDate" class="form-control" required>
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>วัตถุประสงค์ / กิจกรรม / หมายเหตุ</label>
+                <textarea id="issueNote" class="form-control" placeholder="เช่น ใช้ในกิจกรรมรอบบ่าย, นำไปเปลี่ยนล้อ ATV คันที่ 3"></textarea>
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>รูปหลักฐานการเบิก (ถ้ามี)</label>
+                <div class="drop-zone" onclick="document.getElementById('issueImgFileInput').click()">
+                  <div style="font-size: 24px; margin-bottom: 4px;">📸</div>
+                  <div style="font-weight: 600; font-size: 13px; color: #475569;">คลิกถ่ายรูปหรือแนบรูปใบเบิก</div>
+                  <input type="file" id="issueImgFileInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelection(event, 'issue')">
+                </div>
+                <div class="img-preview-grid" id="issueImgPreviewArea"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+              <button type="button" class="btn btn-outline" onclick="clearIssueForm()">ล้างฟอร์ม</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitIssue">📤 ยืนยันการเบิกสินค้า</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================= 5. HISTORY VIEW ================= -->
+      <section id="view-history" class="view-container">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>📜 ประวัติการเบิกจ่ายสินค้า</h2>
+            <p>บันทึกประวัติการเบิกย้อนหลัง พร้อมระบบยกเลิกคืนสต็อกอัตโนมัติ (Undo)</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="exportHistoryCSV()">⬇️ Export CSV</button>
+          </div>
+        </div>
+
+        <!-- History Filter Bar -->
+        <div class="card" style="padding: 14px 18px; margin-bottom: 16px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 220px;">
+              <input type="text" id="histSearchInput" class="form-control" placeholder="🔍 ค้นหาชื่ออุปกรณ์, ผู้เบิก, หรือหมายเหตุ..." oninput="renderHistoryTable()">
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">วันที่:</label>
+              <input type="date" id="histFilterDateFrom" class="form-control" style="width: 140px;" onchange="renderHistoryTable()">
+              <span style="color: var(--text-muted);">-</span>
+              <input type="date" id="histFilterDateTo" class="form-control" style="width: 140px;" onchange="renderHistoryTable()">
+              <button class="btn btn-secondary btn-sm" onclick="clearHistoryFilters()">ล้างตัวกรอง</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>วันที่ / เวลา</th>
+                <th>ชื่ออุปกรณ์</th>
+                <th class="text-right">จำนวนที่เบิก</th>
+                <th>ผู้เบิก</th>
+                <th>หมายเหตุ / กิจกรรม</th>
+                <th>รูปภาพ</th>
+                <th class="text-center">การกระทำ</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr><td colspan="7" class="text-center" style="padding: 30px; color: var(--text-muted);">กำลังโหลดประวัติการเบิก...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 6. CSV IMPORT VIEW ================= -->
+      <section id="view-import" class="view-container">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>📂 นำเข้าข้อมูลสินค้าด้วยไฟล์ CSV</h2>
+            <p>เพิ่มรายการสินค้าหลายรายการพร้อมกันอย่างรวดเร็วผ่านตาราง CSV</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">📥 ดาวน์โหลดไฟล์ตัวอย่าง (Template)</button>
+          </div>
+        </div>
+
+        <div class="card" style="max-width: 820px; margin: 0 auto;">
+          <div class="drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()">
+            <div style="font-size: 38px; margin-bottom: 8px;">📊</div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1e293b;">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์ CSV มาวางที่นี่</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">รองรับหัวตาราง: <code>name, qty, price, threshold, category, note</code></p>
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
+          </div>
+
+          <!-- CSV Preview Area -->
+          <div id="csvPreviewSection" style="display: none; margin-top: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h4 style="font-size: 14.5px; font-weight: 700;" id="csvPreviewCount">ตัวอย่างข้อมูล 0 รายการ</h4>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline btn-sm" onclick="cancelCSVImport()">ยกเลิก</button>
+                <button class="btn btn-success btn-sm" onclick="confirmCSVImport()">✅ ยืนยันการนำเข้าทั้งหมด</button>
+              </div>
+            </div>
+
+            <div class="table-container" style="max-height: 380px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ชื่อสินค้า</th>
+                    <th>หมวดหมู่</th>
+                    <th class="text-right">จำนวน</th>
+                    <th class="text-right">ราคา</th>
+                    <th class="text-right">เตือนเมื่อ ≤</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody id="csvPreviewTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Tab Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-tab active" data-view="dashboard" onclick="switchView('dashboard')">
+      <span class="m-icon">📊</span>
+      <span>ภาพรวม</span>
+    </div>
+    <div class="mobile-tab" data-view="inventory" onclick="switchView('inventory')">
+      <span class="m-icon">📦</span>
+      <span>สต็อก</span>
+    </div>
+    <div class="mobile-tab" data-view="issue" onclick="switchView('issue')">
+      <span class="m-icon">📤</span>
+      <span>เบิกของ</span>
+    </div>
+    <div class="mobile-tab" data-view="history" onclick="switchView('history')">
+      <span class="m-icon">📜</span>
+      <span>ประวัติ</span>
+    </div>
+    <div class="mobile-tab" data-view="stockin" onclick="switchView('stockin')">
+      <span class="m-icon">➕</span>
+      <span>เพิ่มสินค้า</span>
+    </div>
+  </nav>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Edit Item Modal -->
+  <div class="modal-overlay" id="modalEditItem">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>✏️ แก้ไขข้อมูลสินค้า</h3>
+        <button class="modal-close" onclick="closeModal('modalEditItem')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditItem" onsubmit="handleSaveEditItem(event)">
+          <input type="hidden" id="editItemId">
+          <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>ชื่อสินค้า / อุปกรณ์ <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="editName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>หมวดหมู่</label>
+              <select id="editCategory" class="form-control">
+                <option value="กิจกรรมทั่วไป">กิจกรรมทั่วไป</option>
+                <option value="ยานพาหนะ ATV">ยานพาหนะ ATV</option>
+                <option value="วัสดุสิ้นเปลือง">วัสดุสิ้นเปลือง</option>
+                <option value="เครื่องมือซ่อม">เครื่องมือซ่อม</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>จำนวนคงเหลือ</label>
+              <input type="number" id="editQty" class="form-control" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>ราคาต่อหน่วย (บาท)</label>
+              <input type="number" id="editPrice" class="form-control" min="0" step="0.25">
+            </div>
+            <div class="form-group">
+              <label>แจ้งเตือนเมื่อ ≤ (ชิ้น)</label>
+              <input type="number" id="editThreshold" class="form-control" min="0">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>หมายเหตุ</label>
+              <textarea id="editNote" class="form-control"></textarea>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>รูปภาพสินค้า</label>
+              <div class="drop-zone" onclick="document.getElementById('editImgFileInput').click()">
+                <div style="font-size: 20px;">📷 เพิ่มรูปภาพ</div>
+                <input type="file" id="editImgFileInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelection(event, 'edit')">
+              </div>
+              <div class="img-preview-grid" id="editImgPreviewArea"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalEditItem')">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('formEditItem').requestSubmit()">บันทึกการแก้ไข</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Viewer Modal -->
+  <div class="modal-overlay" id="modalImageViewer" onclick="closeModal('modalImageViewer')">
+    <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+      <img id="viewerImageElement" src="" alt="ภาพสินค้า" style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+    </div>
+  </div>
+
+  <!-- Cloud & App Settings Modal -->
+  <div class="modal-overlay" id="modalSettings">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ การตั้งค่าระบบ & Cloud Sync</h3>
+        <button class="modal-close" onclick="closeModal('modalSettings')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>คลังข้อมูล (Workspace Collection)</label>
+          <input type="text" id="settingCollectionPrefix" class="form-control" placeholder="smart_stock">
+          <span class="input-hint">แยกตารางข้อมูลอิสระ ไม่ปะปนกับเว็บเดิม ค่าเริ่มต้น: <code>smart_stock</code></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>สถานะการเชื่อมต่อฐานข้อมูล</label>
+          <div style="background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 13px;">
+            <div>สถานะ: <strong id="settingConnStatusText" style="color: #10b981;">กำลังเชื่อมต่อ...</strong></div>
+            <div style="margin-top: 4px; font-size: 11px; color: var(--text-muted);">Firebase Firestore Project: <code>stock-69302</code></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>สำรองข้อมูล (Backup / Export JSON)</label>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="backupDatabaseJSON()">💾 ดาวน์โหลด JSON สำรอง</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('restoreJSONInput').click()">📥 กู้คืนจาก JSON</button>
+            <input type="file" id="restoreJSONInput" accept=".json" style="display: none;" onchange="restoreDatabaseJSON(event)">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalSettings')">ปิด</button>
+        <button type="button" class="btn btn-primary" onclick="saveSettings()">บันทึกการตั้งค่า</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-tray" id="toastTray"></div>
+
+  <!-- Application Logic -->
+  <script>
+    /* ==========================================================
+       1. GLOBAL STATE & CONFIG
+       ========================================================== */
+    const DEFAULT_FB_CONFIG = {
+      apiKey: "AIzaSyBo8aIL2e1XLdS4BeOPEreXaA3IyWDTiHY",
+      authDomain: "stock-69302.firebaseapp.com",
+      projectId: "stock-69302",
+      storageBucket: "stock-69302.firebasestorage.app",
+      messagingSenderId: "301831402512",
+      appId: "1:301831402512:web:290a578b80c199314bc695"
+    };
+
+    let collectionPrefix = localStorage.getItem('smart_stock_prefix') || 'smart_stock';
+    let soundEnabled = localStorage.getItem('smart_stock_sound') !== 'false';
+
+    let items = [];
+    let historyData = [];
+    let addImgFiles = [];
+    let issueImgFiles = [];
+    let editImgFiles = [];
+    let editExistingUrls = [];
+    let pendingCSVRows = [];
+    let currentSummaryFilter = 'month'; // 'today', 'month', 'custom'
+    let customSummaryMonthStr = '';
+    let monthlyChartInstance = null;
+
+    /* Initialize Firebase */
+    let db = null;
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(DEFAULT_FB_CONFIG);
+      }
+      db = firebase.firestore();
+      // Enable offline persistence if available
+      db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+        console.warn('Firestore persistence notice:', err.code);
+      });
+    } catch (err) {
+      console.error('Firebase init error:', err);
+    }
+
+    /* Web Audio Sound Synthesizer */
+    const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+    function playBeep(type = 'success') {
+      if (!soundEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'success') {
+          osc.frequency.setValueAtTime(587.33, now); // D5
+          osc.frequency.setValueAtTime(880, now + 0.08); // A5
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'warning') {
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(330, now + 0.1);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.32);
+        }
+      } catch (e) { /* ignore audio error */ }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('smart_stock_sound', soundEnabled ? 'true' : 'false');
+      document.getElementById('btnSoundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+      showToast(soundEnabled ? 'เปิดเสียงเอฟเฟกต์แล้ว 🔊' : 'ปิดเสียงเอฟเฟกต์แล้ว 🔇', 'info');
+      if (soundEnabled) playBeep('success');
+    }
+
+    /* Toast Notification Helper */
+    function showToast(msg, type = 'success') {
+      const tray = document.getElementById('toastTray');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : 'ℹ️'));
+      toast.innerHTML = `<span>${icon}</span><span style="flex:1;">${msg}</span>`;
+      tray.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s, transform 0.3s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 320);
+      }, 3500);
+    }
+
+    /* Date & Formatting Helpers */
+    function getTodayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function formatNumber(n, decimals = 2) {
+      return Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function formatInteger(n) {
+      return Number(n || 0).toLocaleString('th-TH');
+    }
+
+    const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    const MONTHS_FULL_TH = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+    function formatThaiDate(dStr) {
+      if (!dStr) return '-';
+      const parts = String(dStr).split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        return `${d} ${MONTHS_TH[m] || ''} ${y + 543}`;
+      }
+      return dStr;
+    }
+
+    function formatThaiDateTime(val) {
+      if (!val) return '-';
+      let dateObj = null;
+      if (val && typeof val.toDate === 'function') dateObj = val.toDate();
+      else dateObj = new Date(val);
+      if (isNaN(dateObj.getTime())) return String(val);
+      const d = dateObj.getDate();
+      const m = MONTHS_TH[dateObj.getMonth()];
+      const y = dateObj.getFullYear() + 543;
+      const h = String(dateObj.getHours()).padStart(2, '0');
+      const min = String(dateObj.getMinutes()).padStart(2, '0');
+      return `${d} ${m} ${y} ${h}:${min} น.`;
+    }
+
+    /* Escape HTML */
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[m]);
+    }
+
+    /* ==========================================================
+       2. REAL-TIME DATA LISTENERS
+       ========================================================== */
+    function startRealtimeSync() {
+      if (!db) {
+        updateConnStatus(false, 'ไม่พบฐานข้อมูล');
+        return;
+      }
+
+      const itemsCol = `${collectionPrefix}_items`;
+      const histCol = `${collectionPrefix}_history`;
+
+      // 1. Listen for items
+      db.collection(itemsCol).onSnapshot(snapshot => {
+        items = [];
+        snapshot.forEach(doc => {
+          items.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort items by name
+        items.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'th'));
+        
+        // Cache to localStorage
+        try { localStorage.setItem('cached_stock_items', JSON.stringify(items)); } catch(e){}
+
+        updateConnStatus(true, 'เชื่อมต่อแล้ว (เรียลไทม์)');
+        refreshAllViews();
+      }, err => {
+        console.error('Items sync error:', err);
+        updateConnStatus(false, 'ออฟไลน์ (ใช้งานแคช)');
+        loadCachedData();
+      });
+
+      // 2. Listen for history
+      db.collection(histCol).onSnapshot(snapshot => {
+        historyData = [];
+        snapshot.forEach(doc => {
+          historyData.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort newest first
+        historyData.sort((a, b) => {
+          const dtA = (a.date || '') + ' ' + (a.time || '');
+          const dtB = (b.date || '') + ' ' + (b.time || '');
+          return dtB.localeCompare(dtA);
+        });
+
+        try { localStorage.setItem('cached_stock_history', JSON.stringify(historyData)); } catch(e){}
+
+        refreshAllViews();
+      }, err => {
+        console.error('History sync error:', err);
+      });
+    }
+
+    function loadCachedData() {
+      try {
+        const cachedItems = localStorage.getItem('cached_stock_items');
+        if (cachedItems) items = JSON.parse(cachedItems);
+        const cachedHist = localStorage.getItem('cached_stock_history');
+        if (cachedHist) historyData = JSON.parse(cachedHist);
+        refreshAllViews();
+      } catch (e) {}
+    }
+
+    function updateConnStatus(online, text) {
+      const dot = document.getElementById('pulseDot');
+      const textElem = document.getElementById('connText');
+      const statusSetting = document.getElementById('settingConnStatusText');
+
+      if (online) {
+        dot.className = 'pulse-dot online';
+        textElem.textContent = text || 'ออนไลน์ เรียลไทม์';
+        if (statusSetting) {
+          statusSetting.textContent = 'ออนไลน์และเชื่อมต่อสดสมบูรณ์';
+          statusSetting.style.color = '#10b981';
+        }
+      } else {
+        dot.className = 'pulse-dot offline';
+        textElem.textContent = text || 'ออฟไลน์';
+        if (statusSetting) {
+          statusSetting.textContent = 'ออฟไลน์ / โหมดเครื่อง';
+          statusSetting.style.color = '#f59e0b';
+        }
+      }
+    }
+
+    function refreshAllViews() {
+      updateKpis();
+      renderInventoryTable();
+      renderHistoryTable();
+      renderSummaryReport();
+      renderMonthlyChart();
+      updateIssueItemSelect();
+      updateAutocompleteDatalists();
+    }
+
+    /* ==========================================================
+       3. NAVIGATION & VIEW SWITCHING
+       ========================================================== */
+    function switchView(viewName) {
+      document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.add('active');
+
+      // Update sidebar
+      document.querySelectorAll('.app-sidebar .nav-link').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === viewName);
+      });
+
+      // Update mobile nav
+      document.querySelectorAll('.mobile-nav .mobile-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === viewName);
+      });
+
+      // Specific view hooks
+      if (viewName === 'dashboard') {
+        renderMonthlyChart();
+        renderSummaryReport();
+      } else if (viewName === 'inventory') {
+        renderInventoryTable();
+      } else if (viewName === 'history') {
+        renderHistoryTable();
+      } else if (viewName === 'issue') {
+        updateIssueItemSelect();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterLowStockView() {
+      switchView('inventory');
+      document.getElementById('inventoryStatusFilter').value = 'low';
+      renderInventoryTable();
+    }
+
+    /* ==========================================================
+       4. DASHBOARD & KPIS
+       ========================================================== */
+    function updateKpis() {
+      const totalItems = items.length;
+      let totalQty = 0;
+      let totalValue = 0;
+      let lowStockCount = 0;
+
+      items.forEach(it => {
+        const q = Number(it.qty) || 0;
+        const p = Number(it.price) || 0;
+        const thr = Number(it.threshold) || 0;
+        totalQty += q;
+        totalValue += (q * p);
+        if (q <= thr) lowStockCount++;
+      });
+
+      document.getElementById('kpiTotalItems').textContent = formatInteger(totalItems);
+      document.getElementById('kpiTotalQty').textContent = formatInteger(totalQty);
+      document.getElementById('kpiTotalValue').textContent = `฿${formatNumber(totalValue, 2)}`;
+      document.getElementById('kpiLowStock').textContent = formatInteger(lowStockCount);
+
+      // Low stock badges & banner
+      const lowPill = document.getElementById('lowStockPill');
+      if (lowStockCount > 0) {
+        lowPill.style.display = 'inline-block';
+        lowPill.textContent = lowStockCount;
+        document.getElementById('lowStockBanner').classList.add('show');
+        document.getElementById('lowStockBannerMsg').textContent = `มีอุปกรณ์ใกล้หมดสต็อก ${lowStockCount} รายการ กรุณาตรวจสอบหรือสั่งซื้อเพิ่ม`;
+      } else {
+        lowPill.style.display = 'none';
+        document.getElementById('lowStockBanner').classList.remove('show');
+      }
+
+      // Calculate Issues This Month & Today
+      const today = getTodayString();
+      const thisMonth = today.slice(0, 7);
+      let monthIssueCount = 0;
+      let todayIssueCount = 0;
+
+      historyData.forEach(h => {
+        const d = String(h.date || '');
+        if (d.startsWith(thisMonth)) monthIssueCount++;
+        if (d === today) todayIssueCount++;
+      });
+
+      document.getElementById('kpiMonthIssues').textContent = formatInteger(monthIssueCount);
+      document.getElementById('kpiTodayIssues').textContent = formatInteger(todayIssueCount);
+    }
+
+    /* Monthly Chart (12 Months) */
+    function renderMonthlyChart() {
+      const canvas = document.getElementById('monthlyChart');
+      if (!canvas) return;
+
+      const months = [];
+      const now = new Date();
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        months.push({
+          key: `${yyyy}-${mm}`,
+          label: `${MONTHS_TH[d.getMonth()]} ${(yyyy + 543) % 100}`
+        });
+      }
+
+      const issueTotals = {};
+      months.forEach(m => { issueTotals[m.key] = 0; });
+
+      historyData.forEach(h => {
+        if (!h.date) return;
+        const ym = String(h.date).slice(0, 7);
+        if (issueTotals[ym] !== undefined) {
+          issueTotals[ym] += (Number(h.qty) || 0);
+        }
+      });
+
+      const labels = months.map(m => m.label);
+      const data = months.map(m => issueTotals[m.key]);
+
+      if (monthlyChartInstance) {
+        monthlyChartInstance.destroy();
+      }
+
+      monthlyChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'จำนวนชิ้นที่เบิก (ชิ้น)',
+            data,
+            backgroundColor: 'rgba(37, 99, 235, 0.75)',
+            borderColor: '#2563eb',
+            borderWidth: 1.5,
+            borderRadius: 6,
+            hoverBackgroundColor: '#1d4ed8'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `เบิกทั้งหมด: ${formatInteger(ctx.raw)} ชิ้น`
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    /* Summary Report Breakdown */
+    function loadSummaryMode(mode) {
+      currentSummaryFilter = mode;
+      document.getElementById('btnSumToday').className = mode === 'today' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('btnSumMonth').className = mode === 'month' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('btnSumCustom').className = mode === 'custom' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('customMonthSelector').style.display = 'none';
+      renderSummaryReport();
+    }
+
+    function toggleCustomMonthPicker() {
+      const el = document.getElementById('customMonthSelector');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      if (el.style.display === 'block') {
+        populateCustomMonthSelects();
+      }
+    }
+
+    function populateCustomMonthSelects() {
+      const selM = document.getElementById('selSumMonth');
+      const selY = document.getElementById('selSumYear');
+      if (selM.options.length === 0) {
+        for (let i = 1; i <= 12; i++) {
+          const opt = document.createElement('option');
+          opt.value = String(i).padStart(2, '0');
+          opt.textContent = MONTHS_FULL_TH[i];
+          selM.appendChild(opt);
+        }
+      }
+      if (selY.options.length === 0) {
+        const curY = new Date().getFullYear();
+        for (let y = curY; y >= curY - 5; y--) {
+          const opt = document.createElement('option');
+          opt.value = String(y);
+          opt.textContent = `${y + 543}`;
+          selY.appendChild(opt);
+        }
+      }
+      const now = new Date();
+      selM.value = String(now.getMonth() + 1).padStart(2, '0');
+      selY.value = String(now.getFullYear());
+    }
+
+    function applyCustomMonthSummary() {
+      const mm = document.getElementById('selSumMonth').value;
+      const yyyy = document.getElementById('selSumYear').value;
+      customSummaryMonthStr = `${yyyy}-${mm}`;
+      currentSummaryFilter = 'custom';
+      document.getElementById('btnSumToday').className = 'btn btn-outline btn-sm';
+      document.getElementById('btnSumMonth').className = 'btn btn-outline btn-sm';
+      document.getElementById('btnSumCustom').className = 'btn btn-primary btn-sm';
+      renderSummaryReport();
+    }
+
+    function renderSummaryReport() {
+      const today = getTodayString();
+      const thisMonth = today.slice(0, 7);
+
+      let filtered = [];
+      let labelText = '';
+
+      if (currentSummaryFilter === 'today') {
+        filtered = historyData.filter(h => h.date === today);
+        labelText = `สรุปยอดประจำวัน: ${formatThaiDate(today)}`;
+      } else if (currentSummaryFilter === 'month') {
+        filtered = historyData.filter(h => String(h.date || '').startsWith(thisMonth));
+        const now = new Date();
+        labelText = `สรุปยอดประจำเดือน: ${MONTHS_FULL_TH[now.getMonth() + 1]} ${now.getFullYear() + 543}`;
+      } else if (currentSummaryFilter === 'custom') {
+        filtered = historyData.filter(h => String(h.date || '').startsWith(customSummaryMonthStr));
+        const p = customSummaryMonthStr.split('-');
+        const mIdx = parseInt(p[1], 10);
+        const yVal = parseInt(p[0], 10);
+        labelText = `สรุปยอดประจำเดือน: ${MONTHS_FULL_TH[mIdx]} ${yVal + 543}`;
+      }
+
+      // Aggregate by item
+      const itemAgg = {};
+      let totalPieces = 0;
+      let totalTrans = filtered.length;
+
+      filtered.forEach(h => {
+        const name = h.name || 'ไม่ระบุ';
+        const q = Number(h.qty) || 0;
+        totalPieces += q;
+        if (!itemAgg[name]) {
+          itemAgg[name] = { qty: 0, count: 0 };
+        }
+        itemAgg[name].qty += q;
+        itemAgg[name].count += 1;
+      });
+
+      // KPI boxes
+      document.getElementById('summaryKpiBoxes').innerHTML = `
+        <div class="sum-box">
+          <div class="sum-num">${formatInteger(totalTrans)}</div>
+          <div class="sum-txt">จำนวนครั้งที่เบิก</div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-num" style="color:#10b981;">${formatInteger(totalPieces)}</div>
+          <div class="sum-txt">จำนวนชิ้นที่เบิกทั้งหมด</div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-num" style="color:#8b5cf6;">${formatInteger(Object.keys(itemAgg).length)}</div>
+          <div class="sum-txt">ชนิดอุปกรณ์ที่ถูกเบิก</div>
+        </div>
+      `;
+
+      // Item breakdown table
+      const sortedItems = Object.keys(itemAgg).sort((a, b) => itemAgg[b].qty - itemAgg[a].qty);
+      const itemTbody = document.getElementById('sumByItemTableBody');
+      if (sortedItems.length === 0) {
+        itemTbody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:var(--text-muted); padding:16px;">ไม่มีข้อมูลการเบิกในช่วงเวลานี้</td></tr>`;
+      } else {
+        itemTbody.innerHTML = sortedItems.map(name => `
+          <tr>
+            <td style="font-weight:600;">${escapeHtml(name)}</td>
+            <td class="text-right" style="font-weight:700; color:var(--primary);">${formatInteger(itemAgg[name].qty)} ชิ้น</td>
+            <td class="text-right">${formatInteger(itemAgg[name].count)} ครั้ง</td>
+          </tr>
+        `).join('');
+      }
+
+      // All Entries Detail table
+      const allTbody = document.getElementById('sumAllEntriesTableBody');
+      if (filtered.length === 0) {
+        allTbody.innerHTML = `<tr><td colspan="5" class="text-center" style="color:var(--text-muted); padding:16px;">ไม่มีรายการบันทึก</td></tr>`;
+      } else {
+        allTbody.innerHTML = filtered.map(h => `
+          <tr>
+            <td>${formatThaiDate(h.date)} ${h.time ? `<span style="font-size:11px; color:var(--text-muted);">${h.time}</span>` : ''}</td>
+            <td style="font-weight:600;">${escapeHtml(h.name)}</td>
+            <td class="text-right" style="font-weight:700; color:#dc2626;">-${formatInteger(h.qty)}</td>
+            <td>${escapeHtml(h.recipient || h.use_by || '-')}</td>
+            <td>${escapeHtml(h.note || '-')}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function printReport() {
+      window.print();
+    }
+
+    /* ==========================================================
+       5. INVENTORY MANAGEMENT
+       ========================================================== */
+    function renderInventoryTable() {
+      const q = (document.getElementById('inventorySearchInput')?.value || '').trim().toLowerCase();
+      const statusFilter = document.getElementById('inventoryStatusFilter')?.value || 'all';
+      const catFilter = document.getElementById('inventoryCategoryFilter')?.value || 'all';
+
+      let filtered = items.filter(it => {
+        const name = (it.name || '').toLowerCase();
+        const cat = (it.category || '').toLowerCase();
+        const note = (it.note || '').toLowerCase();
+        const matchQuery = !q || name.includes(q) || cat.includes(q) || note.includes(q);
+
+        const qty = Number(it.qty) || 0;
+        const thr = Number(it.threshold) || 0;
+        let matchStatus = true;
+        if (statusFilter === 'out') matchStatus = (qty <= 0);
+        else if (statusFilter === 'low') matchStatus = (qty > 0 && qty <= thr);
+        else if (statusFilter === 'ok') matchStatus = (qty > thr);
+
+        let matchCat = (catFilter === 'all') || (it.category === catFilter);
+
+        return matchQuery && matchStatus && matchCat;
+      });
+
+      const tbody = document.getElementById('inventoryTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center" style="padding:40px; color:var(--text-muted);">ไม่พบรายการสินค้าที่ค้นหา</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(it => {
+        const qty = Number(it.qty) || 0;
+        const price = Number(it.price) || 0;
+        const thr = Number(it.threshold) || 0;
+        const totalVal = qty * price;
+
+        let badge = '<span class="badge badge-ok">✅ ปกติ</span>';
+        if (qty <= 0) badge = '<span class="badge badge-out">❌ หมด</span>';
+        else if (qty <= thr) badge = '<span class="badge badge-low">⚠️ ใกล้หมด</span>';
+
+        const imgUrl = (it.images && it.images[0]) ? it.images[0] : '';
+        const imgTag = imgUrl ? 
+          `<img src="${imgUrl}" class="table-item-img" onclick="openImageViewer('${imgUrl}')" title="คลิกเพื่อดูรูปขยาย">` :
+          `<div class="table-item-img" style="display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>`;
+
+        return `
+          <tr>
+            <td>${imgTag}</td>
+            <td>
+              <div style="font-weight:600; color:var(--text);">${escapeHtml(it.name)}</div>
+              ${it.note ? `<div style="font-size:11.5px; color:var(--text-muted);">${escapeHtml(it.note)}</div>` : ''}
+            </td>
+            <td><span class="badge badge-info">${escapeHtml(it.category || 'ทั่วไป')}</span></td>
+            <td class="text-right" style="font-weight:700; font-size:15px; color:${qty <= thr ? 'var(--danger)' : 'var(--text)'};">
+              ${formatInteger(qty)}
+            </td>
+            <td class="text-right">฿${formatNumber(price, 2)}</td>
+            <td class="text-right" style="font-weight:600;">฿${formatNumber(totalVal, 2)}</td>
+            <td class="text-right" style="color:var(--text-muted);">${thr}</td>
+            <td>${badge}</td>
+            <td class="text-center">
+              <div style="display:inline-flex; gap:4px;">
+                <button class="quick-qty-btn" onclick="quickAdjustQty('${it.id}', -1)" title="ลด 1 ชิ้น">-</button>
+                <button class="quick-qty-btn" onclick="quickAdjustQty('${it.id}', 1)" title="เพิ่ม 1 ชิ้น">+</button>
+              </div>
+            </td>
+            <td class="text-center">
+              <div style="display:inline-flex; gap:6px;">
+                <button class="btn btn-outline btn-sm" onclick="openEditItemModal('${it.id}')" title="แก้ไข">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteItem('${it.id}', '${escapeHtml(it.name)}')" title="ลบ">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* Quick Stock Adjustment */
+    async function quickAdjustQty(itemId, delta) {
+      const item = items.find(x => x.id === itemId);
+      if (!item) return;
+      const current = Number(item.qty) || 0;
+      const newQty = Math.max(0, current + delta);
+      if (newQty === current) return;
+
+      try {
+        await db.collection(`${collectionPrefix}_items`).doc(itemId).update({
+          qty: newQty,
+          last_updated: new Date().toISOString()
+        });
+        playBeep('success');
+        showToast(`ปรับสต็อก "${item.name}" เป็น ${newQty} ชิ้นเรียบร้อย`, 'success');
+      } catch (err) {
+        showToast(`ปรับสต็อกล้มเหลว: ${err.message}`, 'error');
+      }
+    }
+
+    /* Confirm Delete Item */
+    async function confirmDeleteItem(itemId, itemName) {
+      if (!confirm(`คุณต้องการลบ "${itemName}" ออกจากระบบคลังใช่หรือไม่?`)) return;
+      try {
+        await db.collection(`${collectionPrefix}_items`).doc(itemId).delete();
+        playBeep('warning');
+        showToast(`ลบรายการ "${itemName}" เรียบร้อยแล้ว`, 'success');
+      } catch (err) {
+        showToast(`ไม่สามารถลบได้: ${err.message}`, 'error');
+      }
+    }
+
+    /* ==========================================================
+       6. STOCK IN & SAVE ITEM
+       ========================================================== */
+    async function handleSaveStockItem(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitStockIn');
+      btn.disabled = true;
+      btn.textContent = '⏳ กำลังบันทึก...';
+
+      const name = document.getElementById('addName').value.trim();
+      const category = document.getElementById('addCategory').value;
+      const qty = parseInt(document.getElementById('addQty').value, 10) || 0;
+      const price = parseFloat(document.getElementById('addPrice').value) || 0;
+      const threshold = parseInt(document.getElementById('addThreshold').value, 10) || 0;
+      const date = document.getElementById('addDate').value || getTodayString();
+      const note = document.getElementById('addNote').value.trim();
+
+      try {
+        // Convert selected image files to base64 URLs
+        const imageUrls = await processImagesToBase64(addImgFiles);
+
+        // Check if item already exists by name
+        const existing = items.find(it => (it.name || '').trim().toLowerCase() === name.toLowerCase());
+
+        if (existing) {
+          // Increment stock
+          const newQty = (Number(existing.qty) || 0) + qty;
+          const mergedImages = [...(existing.images || []), ...imageUrls];
+          await db.collection(`${collectionPrefix}_items`).doc(existing.id).update({
+            qty: newQty,
+            category: category || existing.category,
+            price: price > 0 ? price : existing.price,
+            threshold: threshold > 0 ? threshold : existing.threshold,
+            note: note || existing.note,
+            images: mergedImages,
+            last_stockin_date: date
+          });
+          showToast(`เพิ่มจำนวน "${name}" อีก ${qty} ชิ้น รวมเป็น ${newQty} ชิ้นเรียบร้อย! 📦`, 'success');
+        } else {
+          // Create new item
+          await db.collection(`${collectionPrefix}_items`).add({
+            name,
+            category,
+            qty,
+            price,
+            threshold,
+            date_added: date,
+            last_stockin_date: date,
+            note,
+            images: imageUrls,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast(`สร้างรายการสินค้าใหม่ "${name}" จำนวน ${qty} ชิ้นสำเร็จ! 🎉`, 'success');
+        }
+
+        playBeep('success');
+        clearStockInForm();
+        switchView('inventory');
+      } catch (err) {
+        showToast(`เกิดข้อผิดพลาดในการบันทึก: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 บันทึกรับเข้าสต็อก';
+      }
+    }
+
+    function checkExistingItemName() {
+      const val = document.getElementById('addName').value.trim().toLowerCase();
+      const hint = document.getElementById('nameExistingNotice');
+      if (!val) {
+        hint.textContent = '';
+        return;
+      }
+      const existing = items.find(it => (it.name || '').trim().toLowerCase() === val);
+      if (existing) {
+        hint.textContent = `ℹ️ พบสินค้าเดิมในระบบ (คงเหลือปัจจุบัน: ${existing.qty} ชิ้น) - การบันทึกจะเป็นการบวกจำนวนเพิ่ม`;
+        if (existing.category) document.getElementById('addCategory').value = existing.category;
+        if (existing.price) document.getElementById('addPrice').value = existing.price;
+        if (existing.threshold) document.getElementById('addThreshold').value = existing.threshold;
+      } else {
+        hint.textContent = '';
+      }
+    }
+
+    function clearStockInForm() {
+      document.getElementById('formStockIn').reset();
+      document.getElementById('addDate').value = getTodayString();
+      document.getElementById('nameExistingNotice').textContent = '';
+      addImgFiles = [];
+      document.getElementById('addImgPreviewArea').innerHTML = '';
+    }
+
+    /* ==========================================================
+       7. ISSUE / REQUISITION SYSTEM
+       ========================================================== */
+    function updateIssueItemSelect() {
+      const sel = document.getElementById('issueItemSelect');
+      const curVal = sel.value;
+      sel.innerHTML = '<option value="">-- กรุณาเลือกอุปกรณ์ในสต็อก --</option>';
+
+      items.forEach(it => {
+        const q = Number(it.qty) || 0;
+        const opt = document.createElement('option');
+        opt.value = it.id;
+        opt.textContent = `${it.name} (คงเหลือ: ${q} ชิ้น)${q <= 0 ? ' [หมด]' : ''}`;
+        sel.appendChild(opt);
+      });
+
+      if (curVal && items.some(it => it.id === curVal)) {
+        sel.value = curVal;
+      }
+      onIssueItemChange();
+    }
+
+    function onIssueItemChange() {
+      const selId = document.getElementById('issueItemSelect').value;
+      const callout = document.getElementById('issueStockCallout');
+      if (!selId) {
+        callout.style.display = 'none';
+        calculateIssueRemaining();
+        return;
+      }
+
+      const item = items.find(it => it.id === selId);
+      if (item) {
+        callout.style.display = 'block';
+        document.getElementById('issueCalloutTitle').textContent = `อุปกรณ์: ${item.name} (${item.category || 'ทั่วไป'})`;
+        document.getElementById('issueCalloutQty').textContent = `คงเหลือ: ${item.qty || 0} ชิ้น`;
+        calculateIssueRemaining();
+      }
+    }
+
+    function setIssuePresetQty(num) {
+      const input = document.getElementById('issueQty');
+      const cur = parseInt(input.value, 10) || 0;
+      input.value = cur + num;
+      calculateIssueRemaining();
+    }
+
+    function setIssuePresetMax() {
+      const selId = document.getElementById('issueItemSelect').value;
+      const item = items.find(it => it.id === selId);
+      if (item) {
+        document.getElementById('issueQty').value = item.qty || 0;
+        calculateIssueRemaining();
+      }
+    }
+
+    function calculateIssueRemaining() {
+      const selId = document.getElementById('issueItemSelect').value;
+      const issueQty = parseInt(document.getElementById('issueQty').value, 10) || 0;
+      const preview = document.getElementById('issueRemainingPreview');
+
+      if (!selId) {
+        preview.value = '-';
+        return;
+      }
+
+      const item = items.find(it => it.id === selId);
+      if (!item) return;
+
+      const currentQty = Number(item.qty) || 0;
+      const remain = currentQty - issueQty;
+
+      if (remain < 0) {
+        preview.value = `⚠️ สต็อกไม่พอ (ขาดอีก ${Math.abs(remain)} ชิ้น)`;
+        preview.style.color = '#dc2626';
+      } else {
+        preview.value = `${remain} ชิ้น`;
+        preview.style.color = '#15803d';
+      }
+    }
+
+    async function handleSaveIssue(e) {
+      e.preventDefault();
+      const selId = document.getElementById('issueItemSelect').value;
+      if (!selId) {
+        showToast('กรุณาเลือกอุปกรณ์ที่จะเบิก', 'error');
+        return;
+      }
+
+      const item = items.find(it => it.id === selId);
+      if (!item) return;
+
+      const withdrawQty = parseInt(document.getElementById('issueQty').value, 10) || 0;
+      if (withdrawQty <= 0) {
+        showToast('จำนวนที่เบิกต้องมากกว่า 0', 'error');
+        return;
+      }
+
+      const curStock = Number(item.qty) || 0;
+      if (withdrawQty > curStock) {
+        showToast(`จำนวนที่เบิก (${withdrawQty}) เกินกว่าคงเหลือในสต็อก (${curStock})`, 'error');
+        playBeep('warning');
+        return;
+      }
+
+      const recipient = document.getElementById('issueRecipient').value.trim();
+      const issueDate = document.getElementById('issueDate').value || getTodayString();
+      const note = document.getElementById('issueNote').value.trim();
+
+      const btn = document.getElementById('btnSubmitIssue');
+      btn.disabled = true;
+      btn.textContent = '⏳ กำลังบันทึกการเบิก...';
+
+      try {
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const imageUrls = await processImagesToBase64(issueImgFiles);
+
+        // 1. Batch transaction: reduce stock + write history
+        const batch = db.batch();
+        const itemRef = db.collection(`${collectionPrefix}_items`).doc(item.id);
+        const histRef = db.collection(`${collectionPrefix}_history`).doc();
+
+        batch.update(itemRef, {
+          qty: curStock - withdrawQty,
+          last_issued_date: issueDate
+        });
+
+        batch.set(histRef, {
+          item_id: item.id,
+          name: item.name,
+          qty: withdrawQty,
+          recipient,
+          date: issueDate,
+          time: timeStr,
+          note,
+          images: imageUrls,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await batch.commit();
+
+        playBeep('success');
+        showToast(`เบิก "${item.name}" จำนวน ${withdrawQty} ชิ้นเรียบร้อย 📤`, 'success');
+        clearIssueForm();
+        switchView('history');
+      } catch (err) {
+        showToast(`การเบิกล้มเหลว: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📤 ยืนยันการเบิกสินค้า';
+      }
+    }
+
+    function clearIssueForm() {
+      document.getElementById('formIssue').reset();
+      document.getElementById('issueDate').value = getTodayString();
+      document.getElementById('issueStockCallout').style.display = 'none';
+      document.getElementById('issueRemainingPreview').value = '-';
+      issueImgFiles = [];
+      document.getElementById('issueImgPreviewArea').innerHTML = '';
+    }
+
+    /* ==========================================================
+       8. HISTORY LOG & UNDO REVERSAL
+       ========================================================== */
+    function renderHistoryTable() {
+      const q = (document.getElementById('histSearchInput')?.value || '').trim().toLowerCase();
+      const dateFrom = document.getElementById('histFilterDateFrom')?.value || '';
+      const dateTo = document.getElementById('histFilterDateTo')?.value || '';
+
+      const filtered = historyData.filter(h => {
+        const name = (h.name || '').toLowerCase();
+        const rec = (h.recipient || h.use_by || '').toLowerCase();
+        const note = (h.note || '').toLowerCase();
+        const matchQ = !q || name.includes(q) || rec.includes(q) || note.includes(q);
+
+        const d = h.date || '';
+        let matchDate = true;
+        if (dateFrom && d < dateFrom) matchDate = false;
+        if (dateTo && d > dateTo) matchDate = false;
+
+        return matchQ && matchDate;
+      });
+
+      const tbody = document.getElementById('historyTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:40px; color:var(--text-muted);">ไม่พบประวัติการเบิกตามเงื่อนไข</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(h => {
+        const imgUrl = (h.images && h.images[0]) ? h.images[0] : '';
+        const imgTag = imgUrl ? 
+          `<img src="${imgUrl}" class="table-item-img" style="width:36px;height:36px;" onclick="openImageViewer('${imgUrl}')">` : '-';
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:600;">${formatThaiDate(h.date)}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${h.time || ''}</div>
+            </td>
+            <td style="font-weight:600; color:var(--text);">${escapeHtml(h.name)}</td>
+            <td class="text-right" style="font-weight:700; color:#dc2626;">-${formatInteger(h.qty)}</td>
+            <td><span class="badge badge-info">${escapeHtml(h.recipient || h.use_by || '-')}</span></td>
+            <td>${escapeHtml(h.note || '-')}</td>
+            <td>${imgTag}</td>
+            <td class="text-center">
+              <button class="btn btn-outline btn-sm" onclick="undoHistoryIssue('${h.id}', '${escapeHtml(h.name)}', ${h.qty}, '${h.item_id || ''}')" title="ยกเลิกรายการเบิกนี้ และคืนสต็อกเข้าคลัง">
+                ↩️ ยกเลิกการเบิก
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function clearHistoryFilters() {
+      document.getElementById('histSearchInput').value = '';
+      document.getElementById('histFilterDateFrom').value = '';
+      document.getElementById('histFilterDateTo').value = '';
+      renderHistoryTable();
+    }
+
+    async function undoHistoryIssue(histId, itemName, qty, itemId) {
+      if (!confirm(`ต้องการยกเลิกการเบิก "${itemName}" จำนวน ${qty} ชิ้น และนำสต็อกกลับเข้าคลังใช่หรือไม่?`)) return;
+
+      try {
+        const batch = db.batch();
+        const histRef = db.collection(`${collectionPrefix}_history`).doc(histId);
+        batch.delete(histRef);
+
+        // Find corresponding item in items collection
+        let targetItem = items.find(it => it.id === itemId);
+        if (!targetItem) {
+          targetItem = items.find(it => it.name === itemName);
+        }
+
+        if (targetItem) {
+          const itemRef = db.collection(`${collectionPrefix}_items`).doc(targetItem.id);
+          const restoredQty = (Number(targetItem.qty) || 0) + Number(qty);
+          batch.update(itemRef, { qty: restoredQty });
+        }
+
+        await batch.commit();
+
+        playBeep('success');
+        showToast(`ยกเลิกรายการเบิกและคืนสต็อก ${qty} ชิ้นเรียบร้อย ✔`, 'success');
+      } catch (err) {
+        showToast(`ไม่สามารถยกเลิกได้: ${err.message}`, 'error');
+      }
+    }
+
+    /* ==========================================================
+       9. EDIT ITEM MODAL
+       ========================================================== */
+    function openEditItemModal(itemId) {
+      const item = items.find(it => it.id === itemId);
+      if (!item) return;
+
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('editName').value = item.name || '';
+      document.getElementById('editCategory').value = item.category || 'กิจกรรมทั่วไป';
+      document.getElementById('editQty').value = item.qty || 0;
+      document.getElementById('editPrice').value = item.price || 0;
+      document.getElementById('editThreshold').value = item.threshold || 0;
+      document.getElementById('editNote').value = item.note || '';
+
+      editImgFiles = [];
+      editExistingUrls = [...(item.images || [])];
+      renderEditExistingThumbs();
+
+      openModal('modalEditItem');
+    }
+
+    function renderEditExistingThumbs() {
+      const area = document.getElementById('editImgPreviewArea');
+      area.innerHTML = editExistingUrls.map((url, idx) => `
+        <div class="img-thumb-wrap">
+          <img src="${url}" class="img-thumb">
+          <span class="thumb-del" onclick="removeEditExistingImage(${idx})">✕</span>
+        </div>
+      `).join('');
+    }
+
+    function removeEditExistingImage(idx) {
+      editExistingUrls.splice(idx, 1);
+      renderEditExistingThumbs();
+    }
+
+    async function handleSaveEditItem(e) {
+      e.preventDefault();
+      const id = document.getElementById('editItemId').value;
+      const name = document.getElementById('editName').value.trim();
+      const category = document.getElementById('editCategory').value;
+      const qty = parseInt(document.getElementById('editQty').value, 10) || 0;
+      const price = parseFloat(document.getElementById('editPrice').value) || 0;
+      const threshold = parseInt(document.getElementById('editThreshold').value, 10) || 0;
+      const note = document.getElementById('editNote').value.trim();
+
+      try {
+        const newUrls = await processImagesToBase64(editImgFiles);
+        const allImages = [...editExistingUrls, ...newUrls];
+
+        await db.collection(`${collectionPrefix}_items`).doc(id).update({
+          name, category, qty, price, threshold, note, images: allImages
+        });
+
+        playBeep('success');
+        showToast(`บันทึกการแก้ไข "${name}" สำเร็จ!`, 'success');
+        closeModal('modalEditItem');
+      } catch (err) {
+        showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      }
+    }
+
+    /* ==========================================================
+       10. CSV IMPORT & EXPORT
+       ========================================================== */
+    function downloadCSVTemplate() {
+      const headers = ['name', 'category', 'qty', 'price', 'threshold', 'note'];
+      const sampleRows = [
+        ['หมวกกันน็อค ATV', 'ยานพาหนะ ATV', '30', '450', '5', 'หมวกกิจกรรม'],
+        ['ถุงมือการ์ดไซส์ L', 'ยานพาหนะ ATV', '50', '180', '10', 'ป้องกันรอยถลอก'],
+        ['น้ำดื่มขวด 600ml', 'วัสดุสิ้นเปลือง', '120', '7', '24', 'เครื่องดื่มแจกลูกค้า']
+      ];
+      exportCSVFile(headers, sampleRows, 'stock_import_template.csv');
+    }
+
+    function exportStockCSV() {
+      const headers = ['ชื่ออุปกรณ์', 'หมวดหมู่', 'จำนวนคงเหลือ', 'ราคาต่อหน่วย', 'มูลค่ารวม', 'แจ้งเตือนเมื่อต่ำกว่า', 'หมายเหตุ'];
+      const rows = items.map(it => [
+        it.name,
+        it.category || 'ทั่วไป',
+        it.qty || 0,
+        it.price || 0,
+        ((it.qty || 0) * (it.price || 0)).toFixed(2),
+        it.threshold || 0,
+        it.note || ''
+      ]);
+      exportCSVFile(headers, rows, `stock_inventory_${getTodayString()}.csv`);
+    }
+
+    function exportHistoryCSV() {
+      const headers = ['วันที่', 'เวลา', 'ชื่ออุปกรณ์', 'จำนวนที่เบิก', 'ผู้เบิก', 'หมายเหตุ'];
+      const rows = historyData.map(h => [
+        h.date,
+        h.time || '',
+        h.name,
+        h.qty,
+        h.recipient || h.use_by || '',
+        h.note || ''
+      ]);
+      exportCSVFile(headers, rows, `stock_history_${getTodayString()}.csv`);
+    }
+
+    function exportSummaryCSV() {
+      exportHistoryCSV();
+    }
+
+    function exportCSVFile(headers, rows, filename) {
+      // Add UTF-8 BOM so Thai text displays correctly in Excel
+      let csvContent = '\uFEFF' + headers.join(',') + '\n';
+      rows.forEach(r => {
+        const line = r.map(val => {
+          let s = String(val === undefined || val === null ? '' : val).replace(/"/g, '""');
+          if (s.search(/("|,|\n)/g) >= 0) s = `"${s}"`;
+          return s;
+        }).join(',');
+        csvContent += line + '\n';
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showToast(`ส่งออกไฟล์ "${filename}" เรียบร้อย 📊`, 'success');
+    }
+
+    function handleCSVUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        parseCSVText(evt.target.result);
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    function parseCSVText(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) {
+        showToast('ไฟล์ CSV ไม่มีข้อมูล', 'error');
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+      pendingCSVRows = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        // Basic CSV line splitter
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+        const row = {};
+        headers.forEach((h, idx) => {
+          row[h] = cols[idx] || '';
+        });
+        const name = row['name'] || row['ชื่ออุปกรณ์'] || row['ชื่อสินค้า'] || cols[0];
+        if (!name) continue;
+
+        pendingCSVRows.push({
+          name: name.trim(),
+          category: row['category'] || row['หมวดหมู่'] || 'กิจกรรมทั่วไป',
+          qty: parseInt(row['qty'] || row['จำนวน'] || cols[2], 10) || 0,
+          price: parseFloat(row['price'] || row['ราคา'] || cols[3]) || 0,
+          threshold: parseInt(row['threshold'] || row['แจ้งเตือนเมื่อ'] || cols[4], 10) || 5,
+          note: row['note'] || row['หมายเหตุ'] || cols[5] || ''
+        });
+      }
+
+      // Preview Table
+      document.getElementById('csvPreviewCount').textContent = `ตัวอย่างข้อมูล ${pendingCSVRows.length} รายการ`;
+      document.getElementById('csvPreviewTableBody').innerHTML = pendingCSVRows.map(r => {
+        const exists = items.some(it => it.name.toLowerCase() === r.name.toLowerCase());
+        return `
+          <tr>
+            <td style="font-weight:600;">${escapeHtml(r.name)}</td>
+            <td>${escapeHtml(r.category)}</td>
+            <td class="text-right">${formatInteger(r.qty)}</td>
+            <td class="text-right">฿${formatNumber(r.price, 2)}</td>
+            <td class="text-right">${r.threshold}</td>
+            <td>${exists ? '<span class="badge badge-low">บวกเพิ่มสินค้าเดิม</span>' : '<span class="badge badge-ok">สินค้าใหม่</span>'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('csvPreviewSection').style.display = 'block';
+    }
+
+    function cancelCSVImport() {
+      pendingCSVRows = [];
+      document.getElementById('csvPreviewSection').style.display = 'none';
+      document.getElementById('csvFileInput').value = '';
+    }
+
+    async function confirmCSVImport() {
+      if (!pendingCSVRows.length) return;
+      const today = getTodayString();
+      let importedCount = 0;
+
+      try {
+        const batch = db.batch();
+        pendingCSVRows.forEach(r => {
+          const existing = items.find(it => it.name.toLowerCase() === r.name.toLowerCase());
+          if (existing) {
+            batch.update(db.collection(`${collectionPrefix}_items`).doc(existing.id), {
+              qty: (Number(existing.qty) || 0) + r.qty,
+              price: r.price > 0 ? r.price : existing.price,
+              last_stockin_date: today
+            });
+          } else {
+            const ref = db.collection(`${collectionPrefix}_items`).doc();
+            batch.set(ref, {
+              name: r.name,
+              category: r.category,
+              qty: r.qty,
+              price: r.price,
+              threshold: r.threshold,
+              note: r.note,
+              date_added: today,
+              last_stockin_date: today,
+              images: []
+            });
+          }
+          importedCount++;
+        });
+
+        await batch.commit();
+        playBeep('success');
+        showToast(`นำเข้าข้อมูลสต็อกเรียบร้อย ${importedCount} รายการ! 🎉`, 'success');
+        cancelCSVImport();
+        switchView('inventory');
+      } catch (err) {
+        showToast(`เกิดข้อผิดพลาดในการนำเข้า: ${err.message}`, 'error');
+      }
+    }
+
+    /* ==========================================================
+       11. IMAGE PROCESSING & COMPRESSION
+       ========================================================== */
+    function handleImageSelection(e, formType) {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      if (formType === 'add') {
+        addImgFiles.push(...files);
+        renderThumbPreviews(addImgFiles, 'addImgPreviewArea', (idx) => {
+          addImgFiles.splice(idx, 1);
+          handleImageSelection({ target: { files: [] } }, 'add');
+        });
+      } else if (formType === 'issue') {
+        issueImgFiles.push(...files);
+        renderThumbPreviews(issueImgFiles, 'issueImgPreviewArea', (idx) => {
+          issueImgFiles.splice(idx, 1);
+          handleImageSelection({ target: { files: [] } }, 'issue');
+        });
+      } else if (formType === 'edit') {
+        editImgFiles.push(...files);
+        renderThumbPreviews(editImgFiles, 'editImgPreviewArea', (idx) => {
+          editImgFiles.splice(idx, 1);
+          renderEditExistingThumbs();
+        });
+      }
+    }
+
+    function renderThumbPreviews(fileArray, containerId, onRemove) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      fileArray.forEach((file, idx) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'img-thumb-wrap';
+        const img = document.createElement('img');
+        img.className = 'img-thumb';
+        img.src = URL.createObjectURL(file);
+        const del = document.createElement('span');
+        del.className = 'thumb-del';
+        del.textContent = '✕';
+        del.onclick = () => onRemove(idx);
+        wrap.appendChild(img);
+        wrap.appendChild(del);
+        container.appendChild(wrap);
+      });
+    }
+
+    async function processImagesToBase64(fileArray) {
+      const promises = fileArray.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            // Compress using Canvas
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              const maxDim = 800; // max 800px for web storage
+              if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                  height = Math.round((height * maxDim) / width);
+                  width = maxDim;
+                } else {
+                  width = Math.round((width * maxDim) / height);
+                  height = maxDim;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', 0.72));
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+      return Promise.all(promises);
+    }
+
+    function openImageViewer(url) {
+      document.getElementById('viewerImageElement').src = url;
+      openModal('modalImageViewer');
+    }
+
+    /* ==========================================================
+       12. MODAL & SETTINGS
+       ========================================================== */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('open');
+      if (id === 'modalSettings') {
+        document.getElementById('settingCollectionPrefix').value = collectionPrefix;
+      }
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('open');
+    }
+
+    function saveSettings() {
+      const newPrefix = document.getElementById('settingCollectionPrefix').value.trim() || 'smart_stock';
+      if (newPrefix !== collectionPrefix) {
+        collectionPrefix = newPrefix;
+        localStorage.setItem('smart_stock_prefix', newPrefix);
+        showToast(`เปลี่ยนคลังข้อมูลเป็น "${newPrefix}" กำลังโหลดใหม่...`, 'success');
+        startRealtimeSync();
+      }
+      closeModal('modalSettings');
+    }
+
+    function backupDatabaseJSON() {
+      const data = {
+        exported_at: new Date().toISOString(),
+        items,
+        history: historyData
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `stock_backup_${getTodayString()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('ดาวน์โหลดไฟล์สำรอง JSON เรียบร้อย 💾', 'success');
+    }
+
+    function restoreDatabaseJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (!parsed.items || !Array.isArray(parsed.items)) throw new Error('รูปแบบไฟล์ JSON ไม่ถูกต้อง');
+          if (!confirm(`ต้องการกู้คืนข้อมูลสินค้า ${parsed.items.length} รายการใช่หรือไม่?`)) return;
+
+          const batch = db.batch();
+          parsed.items.forEach(it => {
+            const ref = it.id ? db.collection(`${collectionPrefix}_items`).doc(it.id) : db.collection(`${collectionPrefix}_items`).doc();
+            batch.set(ref, it);
+          });
+          await batch.commit();
+          showToast('กู้คืนข้อมูลสำเร็จเรียบร้อย! 🎉', 'success');
+          closeModal('modalSettings');
+        } catch (err) {
+          showToast(`กู้คืนล้มเหลว: ${err.message}`, 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function updateAutocompleteDatalists() {
+      // Items datalist
+      const dlItems = document.getElementById('existingItemsDatalist');
+      if (dlItems) {
+        dlItems.innerHTML = items.map(it => `<option value="${escapeHtml(it.name)}">`).join('');
+      }
+
+      // Recipients datalist
+      const dlRec = document.getElementById('recipientsDatalist');
+      if (dlRec) {
+        const uniqueRecipients = Array.from(new Set(historyData.map(h => h.recipient || h.use_by).filter(Boolean)));
+        dlRec.innerHTML = uniqueRecipients.map(r => `<option value="${escapeHtml(r)}">`).join('');
+      }
+    }
+
+    /* ==========================================================
+       13. INITIALIZATION & PWA SERVICE WORKER
+       ========================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set today's date on all date inputs
+      const today = getTodayString();
+      const addDate = document.getElementById('addDate');
+      const issueDate = document.getElementById('issueDate');
+      if (addDate) addDate.value = today;
+      if (issueDate) issueDate.value = today;
+
+      // Update sound toggle icon
+      document.getElementById('btnSoundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+
+      // Drag and drop CSV listeners
+      const csvDrop = document.getElementById('csvDropZone');
+      if (csvDrop) {
+        csvDrop.addEventListener('dragover', e => { e.preventDefault(); csvDrop.classList.add('dragover'); });
+        csvDrop.addEventListener('dragleave', () => csvDrop.classList.remove('dragover'));
+        csvDrop.addEventListener('drop', e => {
+          e.preventDefault();
+          csvDrop.classList.remove('dragover');
+          if (e.dataTransfer.files.length) {
+            handleCSVUpload({ target: { files: e.dataTransfer.files } });
+          }
+        });
+      }
+
+      // Start Realtime Database sync
+      startRealtimeSync();
+
+      // Register Service Worker for offline PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW registration note:', err);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
