@@ -840,15 +840,210 @@
     }
     .quick-qty-btn:hover { background: #e2e8f0; }
 
-    /* Item Thumbnail on Table */
-    .table-item-img {
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      object-fit: cover;
+    /* CALENDAR & AC STYLES */
+    .cal-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .cal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cal-grid-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    .cal-weekday {
+      padding: 8px 4px;
       background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .cal-weekday.weekend {
+      color: #dc2626;
+      background: #fef2f2;
+    }
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .cal-cell {
+      min-height: 90px;
+      background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .cal-cell:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+      transform: translateY(-1px);
+    }
+    .cal-cell.other-month {
+      background: #f8fafc;
+      opacity: 0.4;
+    }
+    .cal-cell.today {
+      border: 2px solid var(--primary);
+      background: #f0f7ff;
+    }
+    .cal-cell-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .cal-cell-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+    .cal-cell.today .cal-cell-num {
+      color: var(--primary);
+      background: var(--primary-subtle);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cal-event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      overflow: hidden;
+    }
+    .cal-chip {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .cal-chip.cleaned {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+    .cal-chip.due {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
+    .cal-chip.scheduled {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #7dd3fc;
+    }
+
+    /* AC Unit Cards Grid */
+    .ac-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .ac-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .ac-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .ac-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .ac-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .ac-card-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .ac-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .ac-status-badge.ok { background: #dcfce7; color: #15803d; }
+    .ac-status-badge.warning { background: #fef3c7; color: #b45309; }
+    .ac-status-badge.danger { background: #fee2e2; color: #dc2626; }
+
+    .ac-meter {
+      background: #f1f5f9;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin: 4px 0;
+    }
+    .ac-meter-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s;
+    }
+
+    .ac-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .ac-info-row strong {
+      color: var(--text);
+    }
+
+    .sub-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      overflow-x: auto;
     }
   </style>
 </head>
@@ -932,6 +1127,13 @@
           <span>ประวัติการเบิกจ่าย</span>
         </div>
 
+        <div class="menu-header">งานแอร์ & ซ่อมบำรุง</div>
+        <div class="nav-link" data-view="ac-calendar" onclick="switchView('ac-calendar')">
+          <span class="nav-icon">❄️</span>
+          <span>ปฏิทินล้างแอร์</span>
+          <span class="nav-pill" id="acDuePill" style="display: none; background: #0284c7;">0</span>
+        </div>
+
         <div class="menu-header">แอปพลิเคชัน</div>
         <div class="nav-link" id="sidebarInstallBtn" onclick="triggerPWAInstall()" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399;">
           <span class="nav-icon">📲</span>
@@ -968,6 +1170,15 @@
             <span id="lowStockBannerMsg">มีสินค้าใกล้หมดสต็อก กรุณาตรวจสอบ</span>
           </div>
           <button class="btn btn-outline btn-sm" onclick="filterLowStockView()">ดูรายการใกล้หมด</button>
+        </div>
+
+        <!-- AC Due Warning Banner -->
+        <div id="acDueBanner" class="alert-banner" style="display: none; border-left-color: #0284c7; background: linear-gradient(90deg, #f0f9ff, #e0f2fe);">
+          <div class="alert-banner-left">
+            <span>❄️</span>
+            <span id="acDueBannerMsg" style="color: #0369a1;">มีเครื่องปรับอากาศถึงกำหนดล้างแอร์รอบ 90 วัน</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="switchView('ac-calendar')">ดูปฏิทินล้างแอร์</button>
         </div>
 
         <!-- KPI Summary Cards -->
@@ -1023,6 +1234,15 @@
               <div class="kpi-title">ยอดเบิกวันนี้</div>
               <div class="kpi-value" id="kpiTodayIssues">0</div>
               <div class="kpi-sub">ความเคลื่อนไหววันนี้</div>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="cursor: pointer;" onclick="switchView('ac-calendar')" title="คลิกเพื่อดูปฏิทินล้างแอร์">
+            <div class="kpi-icon" style="background: #e0f2fe; color: #0284c7;">❄️</div>
+            <div class="kpi-info">
+              <div class="kpi-title">รอบล้างแอร์ (90 วัน)</div>
+              <div class="kpi-value" id="kpiAcDue" style="color: #0284c7;">0</div>
+              <div class="kpi-sub" id="kpiAcSub">เครื่องที่ถึงรอบล้าง</div>
             </div>
           </div>
         </div>
@@ -1422,6 +1642,112 @@
         </div>
       </section>
 
+      <!-- ================= 7. AC CALENDAR & MAINTENANCE VIEW ================= -->
+      <section id="view-ac-calendar" class="view-container">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>❄️ ปฏิทินล้างแอร์ & ติดตามรอบ 90 วัน</h2>
+            <p>ลงบันทึก นัดหมาย และติดตามรอบล้างเครื่องปรับอากาศประจำห้องแบบเรียลไทม์</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="openAddACUnitModal()">➕ เพิ่มเครื่องแอร์/ห้อง</button>
+            <button class="btn btn-primary btn-sm" onclick="openLogACCleanModal()">❄️ บันทึกล้างแอร์ / นัดหมาย</button>
+          </div>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div class="sub-tabs">
+          <button class="btn btn-primary btn-sm" id="btnTabAcCalendar" onclick="switchAcSubTab('calendar')">📅 ปฏิทินรายเดือน</button>
+          <button class="btn btn-outline btn-sm" id="btnTabAcTracker" onclick="switchAcSubTab('tracker')">❄️ รายการแอร์ & รอบล้าง (90 วัน)</button>
+          <button class="btn btn-outline btn-sm" id="btnTabAcHistory" onclick="switchAcSubTab('history')">📜 ประวัติการล้างแอร์</button>
+        </div>
+
+        <!-- SUB-VIEW 1: CALENDAR VIEW -->
+        <div id="acSubViewCalendar">
+          <div class="card" style="padding: 18px 20px;">
+            <div class="cal-controls">
+              <div class="cal-title" id="calCurrentMonthTitle">
+                🗓️ ตุลาคม 2569
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="prevCalMonth()">◀ เดือนก่อน</button>
+                <button class="btn btn-outline btn-sm" onclick="todayCalMonth()">วันนี้</button>
+                <button class="btn btn-secondary btn-sm" onclick="nextCalMonth()">เดือนถัดไป ▶</button>
+                <select id="calFilterUnitSelect" class="form-control" style="width: 180px; padding: 6px 10px; font-size: 12.5px;" onchange="renderCalendar()">
+                  <option value="all">ทุกห้อง / ทุกเครื่อง</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cal-grid-weekdays">
+              <div class="cal-weekday weekend">อา.</div>
+              <div class="cal-weekday">จ.</div>
+              <div class="cal-weekday">อ.</div>
+              <div class="cal-weekday">พ.</div>
+              <div class="cal-weekday">พฤ.</div>
+              <div class="cal-weekday">ศ.</div>
+              <div class="cal-weekday weekend">ส.</div>
+            </div>
+
+            <div class="cal-days-grid" id="calDaysGridContainer">
+              <!-- Calendar day cells rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 2: AC TRACKER CARDS (90 DAYS) -->
+        <div id="acSubViewTracker" style="display: none;">
+          <div class="card" style="padding: 14px 18px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 240px;">
+                <input type="text" id="acSearchInput" class="form-control" placeholder="🔍 ค้นหาชื่อห้อง, ยี่ห้อ, สถานที่..." oninput="renderACTrackerCards()">
+                <select id="acStatusFilter" class="form-control" style="width: 170px;" onchange="renderACTrackerCards()">
+                  <option value="all">สถานะทั้งหมด</option>
+                  <option value="due">🔴 ถึงกำหนดล้างด่วน! (≥ 90 วัน)</option>
+                  <option value="warning">🟡 ใกล้ถึงรอบ (เหลือ ≤ 15 วัน)</option>
+                  <option value="ok">🟢 ปกติ เพิ่งล้าง</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddACUnitModal()">➕ เพิ่มเครื่องแอร์/ห้อง</button>
+            </div>
+          </div>
+
+          <div class="ac-grid" id="acUnitsGridContainer">
+            <!-- AC Unit Cards rendered via JS -->
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 3: HISTORY LOG -->
+        <div id="acSubViewHistory" style="display: none;">
+          <div class="card" style="padding: 14px 18px; margin-bottom: 16px;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+              <input type="text" id="acHistSearchInput" class="form-control" style="flex: 1; min-width: 220px;" placeholder="🔍 ค้นหาห้อง, ช่าง, หมายเหตุ..." oninput="renderACHistoryTable()">
+              <button class="btn btn-outline btn-sm" onclick="exportACLogsCSV()">⬇️ Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>ห้อง / เครื่องปรับอากาศ</th>
+                  <th>ประเภทงาน</th>
+                  <th>ช่างผู้ดูแล</th>
+                  <th class="text-right">ค่าใช้จ่าย (บาท)</th>
+                  <th>สถานะ</th>
+                  <th>หมายเหตุ</th>
+                  <th class="text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="acHistoryTableBody">
+                <tr><td colspan="8" class="text-center" style="padding: 30px; color: var(--text-muted);">กำลังโหลดประวัติการล้างแอร์...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1443,9 +1769,9 @@
       <span class="m-icon">📜</span>
       <span>ประวัติ</span>
     </div>
-    <div class="mobile-tab" data-view="stockin" onclick="switchView('stockin')">
-      <span class="m-icon">➕</span>
-      <span>เพิ่มสินค้า</span>
+    <div class="mobile-tab" data-view="ac-calendar" onclick="switchView('ac-calendar')">
+      <span class="m-icon">❄️</span>
+      <span>ล้างแอร์</span>
     </div>
   </nav>
 
@@ -1601,6 +1927,143 @@
     </div>
   </div>
 
+  <!-- Modal 1: Add / Edit AC Unit -->
+  <div class="modal-overlay" id="modalAddACUnit">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="acUnitModalTitle">➕ เพิ่มเครื่องปรับอากาศ / ห้อง</h3>
+        <button class="modal-close" onclick="closeModal('modalAddACUnit')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formACUnit" onsubmit="handleSaveACUnit(event)">
+          <input type="hidden" id="acUnitId">
+          <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>ชื่อห้อง / ตำแหน่งที่ติดตั้ง <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="acUnitRoom" class="form-control" placeholder="เช่น บ้านพัก A1, ห้องรับรอง VIP, ออฟฟิศ, โซน ATV" required>
+            </div>
+            <div class="form-group">
+              <label>ยี่ห้อ / ขนาด BTU</label>
+              <input type="text" id="acUnitBrandBtu" class="form-control" placeholder="เช่น Daikin Inverter 18,000 BTU">
+            </div>
+            <div class="form-group">
+              <label>วันที่ล้างล่าสุด <span style="color: var(--danger);">*</span></label>
+              <input type="date" id="acUnitLastCleaned" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>รอบแจ้งเตือนล้างแอร์ (วัน)</label>
+              <input type="number" id="acUnitCycleDays" class="form-control" value="90" min="30" max="365" required>
+              <span class="input-hint">ค่ามาตรฐานทั่วไปคือ 90 วัน (ประมาณ 3 เดือน)</span>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>หมายเหตุ / รายละเอียดเพิ่มเติม</label>
+              <textarea id="acUnitNote" class="form-control" placeholder="เช่น ติดตั้งชั้น 2, ประกันหมดปีหน้า"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalAddACUnit')">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('formACUnit').requestSubmit()">บันทึกข้อมูลเครื่องแอร์</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Log / Schedule AC Cleaning -->
+  <div class="modal-overlay" id="modalLogACClean">
+    <div class="modal-card" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3>❄️ บันทึกการล้างแอร์ / นัดหมาย</h3>
+        <button class="modal-close" onclick="closeModal('modalLogACClean')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formACLog" onsubmit="handleSaveACLog(event)">
+          <input type="hidden" id="acLogId">
+          <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>เลือกเครื่องปรับอากาศ / ห้อง <span style="color: var(--danger);">*</span></label>
+              <select id="acLogUnitSelect" class="form-control" required onchange="onACLogUnitChange()">
+                <option value="">-- กรุณาเลือกเครื่องแอร์ --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>วันที่ดำเนินการ / วันที่นัด <span style="color: var(--danger);">*</span></label>
+              <input type="date" id="acLogDate" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>ประเภทงาน <span style="color: var(--danger);">*</span></label>
+              <select id="acLogType" class="form-control" required>
+                <option value="ล้างใหญ่ประจำรอบ">ล้างใหญ่ประจำรอบ (Full Clean)</option>
+                <option value="ล้างย่อย/ฟิลเตอร์">ล้างย่อย / ฟิลเตอร์กรองฝุ่น</option>
+                <option value="เติมน้ำยาแอร์">เติมน้ำยาแอร์ / เช็กรั่ว</option>
+                <option value="ซ่อมแซม/เปลี่ยนอะไหล่">ซ่อมแซม / เปลี่ยนอะไหล่</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>สถานะรายการ <span style="color: var(--danger);">*</span></label>
+              <select id="acLogStatus" class="form-control" required>
+                <option value="completed">✅ ล้างเสร็จเรียบร้อยแล้ว (อัปเดตวันล่าสุด)</option>
+                <option value="scheduled">📅 นัดหมายล่วงหน้า (ลงปฏิทิน)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>ช่างผู้ดูแล / ร้านแอร์</label>
+              <input type="text" id="acLogTechnician" class="form-control" placeholder="เช่น ช่างบอย, ร้านสยามแอร์เซอร์วิส">
+            </div>
+
+            <div class="form-group">
+              <label>ค่าใช้จ่าย (บาท)</label>
+              <input type="number" id="acLogCost" class="form-control" min="0" step="50" placeholder="เช่น 500">
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>หมายเหตุ / รายละเอียดงาน</label>
+              <textarea id="acLogNote" class="form-control" placeholder="เช่น ล้างคอยล์ร้อน+คอยล์เย็น, ลมแรงขึ้นปกติ, เปลี่ยนฟิลเตอร์"></textarea>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>รูปถ่ายการล้างแอร์ / ใบเสร็จ</label>
+              <div class="drop-zone" onclick="document.getElementById('acLogImgFileInput').click()">
+                <div style="font-size: 24px; margin-bottom: 4px;">📷</div>
+                <div style="font-weight: 600; font-size: 13px; color: #475569;">คลิกแนบรูปถ่ายการล้าง หรือใบเสร็จช่าง</div>
+                <input type="file" id="acLogImgFileInput" accept="image/*" multiple style="display: none;" onchange="handleImageSelection(event, 'aclog')">
+              </div>
+              <div class="img-preview-grid" id="acLogImgPreviewArea"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalLogACClean')">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('formACLog').requestSubmit()">บันทึกรายการ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Day Cleanings Details (Click on Calendar Day) -->
+  <div class="modal-overlay" id="modalDayDetails">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="dayDetailsModalTitle">🗓️ รายการในวันที่</h3>
+        <button class="modal-close" onclick="closeModal('modalDayDetails')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="dayDetailsItemsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Items on this date -->
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalDayDetails')">ปิด</button>
+        <button type="button" class="btn btn-primary" id="btnDayDetailsAddLog">➕ ลงบันทึกล้างแอร์วันนี้</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-tray" id="toastTray"></div>
 
@@ -1623,6 +2086,12 @@
 
     let items = [];
     let historyData = [];
+    let acUnits = [];
+    let acLogs = [];
+    let acLogImgFiles = [];
+    let calCurrentYear = new Date().getFullYear();
+    let calCurrentMonth = new Date().getMonth();
+    let selectedCalDayStr = '';
     let addImgFiles = [];
     let issueImgFiles = [];
     let editImgFiles = [];
@@ -1801,6 +2270,37 @@
       }, err => {
         console.error('History sync error:', err);
       });
+
+      // 3. Listen for AC Units
+      db.collection(`${collectionPrefix}_ac_units`).onSnapshot(snapshot => {
+        acUnits = [];
+        snapshot.forEach(doc => {
+          acUnits.push({ id: doc.id, ...doc.data() });
+        });
+        acUnits.sort((a, b) => (a.room || '').localeCompare(b.room || '', 'th'));
+        try { localStorage.setItem('cached_ac_units', JSON.stringify(acUnits)); } catch(e){}
+        updateACSelectDropdowns();
+        renderACTrackerCards();
+        renderCalendar();
+        updateACKpis();
+      }, err => {
+        console.error('AC Units sync error:', err);
+      });
+
+      // 4. Listen for AC Logs
+      db.collection(`${collectionPrefix}_ac_logs`).onSnapshot(snapshot => {
+        acLogs = [];
+        snapshot.forEach(doc => {
+          acLogs.push({ id: doc.id, ...doc.data() });
+        });
+        acLogs.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        try { localStorage.setItem('cached_ac_logs', JSON.stringify(acLogs)); } catch(e){}
+        renderACHistoryTable();
+        renderCalendar();
+        updateACKpis();
+      }, err => {
+        console.error('AC Logs sync error:', err);
+      });
     }
 
     function loadCachedData() {
@@ -1809,6 +2309,10 @@
         if (cachedItems) items = JSON.parse(cachedItems);
         const cachedHist = localStorage.getItem('cached_stock_history');
         if (cachedHist) historyData = JSON.parse(cachedHist);
+        const cachedUnits = localStorage.getItem('cached_ac_units');
+        if (cachedUnits) acUnits = JSON.parse(cachedUnits);
+        const cachedAcLogs = localStorage.getItem('cached_ac_logs');
+        if (cachedAcLogs) acLogs = JSON.parse(cachedAcLogs);
         refreshAllViews();
       } catch (e) {}
     }
@@ -1837,12 +2341,17 @@
 
     function refreshAllViews() {
       updateKpis();
+      updateACKpis();
       renderInventoryTable();
       renderHistoryTable();
       renderSummaryReport();
       renderMonthlyChart();
       updateIssueItemSelect();
       updateAutocompleteDatalists();
+      updateACSelectDropdowns();
+      renderACTrackerCards();
+      renderCalendar();
+      renderACHistoryTable();
     }
 
     /* ==========================================================
@@ -1867,12 +2376,17 @@
       if (viewName === 'dashboard') {
         renderMonthlyChart();
         renderSummaryReport();
+        updateACKpis();
       } else if (viewName === 'inventory') {
         renderInventoryTable();
       } else if (viewName === 'history') {
         renderHistoryTable();
       } else if (viewName === 'issue') {
         updateIssueItemSelect();
+      } else if (viewName === 'ac-calendar') {
+        renderCalendar();
+        renderACTrackerCards();
+        renderACHistoryTable();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2868,6 +3382,12 @@
           editImgFiles.splice(idx, 1);
           renderEditExistingThumbs();
         });
+      } else if (formType === 'aclog') {
+        acLogImgFiles.push(...files);
+        renderThumbPreviews(acLogImgFiles, 'acLogImgPreviewArea', (idx) => {
+          acLogImgFiles.splice(idx, 1);
+          handleImageSelection({ target: { files: [] } }, 'aclog');
+        });
       }
     }
 
@@ -3009,6 +3529,675 @@
       if (dlRec) {
         const uniqueRecipients = Array.from(new Set(historyData.map(h => h.recipient || h.use_by).filter(Boolean)));
         dlRec.innerHTML = uniqueRecipients.map(r => `<option value="${escapeHtml(r)}">`).join('');
+      }
+    }
+
+    /* ==========================================================
+       12.5 CALENDAR & AC MAINTENANCE SYSTEM LOGIC
+       ========================================================== */
+    function switchAcSubTab(tab) {
+      document.getElementById('acSubViewCalendar').style.display = tab === 'calendar' ? 'block' : 'none';
+      document.getElementById('acSubViewTracker').style.display = tab === 'tracker' ? 'block' : 'none';
+      document.getElementById('acSubViewHistory').style.display = tab === 'history' ? 'block' : 'none';
+
+      document.getElementById('btnTabAcCalendar').className = tab === 'calendar' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('btnTabAcTracker').className = tab === 'tracker' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('btnTabAcHistory').className = tab === 'history' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+
+      if (tab === 'calendar') renderCalendar();
+      if (tab === 'tracker') renderACTrackerCards();
+      if (tab === 'history') renderACHistoryTable();
+    }
+
+    /* Helper: Calculate Next Due Date (dateStr + days) */
+    function addDaysToDate(dateStr, days) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      d.setDate(d.getDate() + parseInt(days, 10));
+      return d.toISOString().slice(0, 10);
+    }
+
+    /* Helper: Calculate days between date and today */
+    function getDaysDiffFromToday(targetDateStr) {
+      if (!targetDateStr) return 0;
+      const t1 = new Date(getTodayString()).getTime();
+      const t2 = new Date(targetDateStr).getTime();
+      return Math.round((t1 - t2) / (1000 * 60 * 60 * 24));
+    }
+
+    /* --- CALENDAR RENDERING --- */
+    function renderCalendar() {
+      const titleElem = document.getElementById('calCurrentMonthTitle');
+      const gridElem = document.getElementById('calDaysGridContainer');
+      if (!gridElem) return;
+
+      const mIdx = calCurrentMonth;
+      const yVal = calCurrentYear;
+      if (titleElem) {
+        titleElem.textContent = `🗓️ ${MONTHS_FULL_TH[mIdx + 1]} ${yVal + 543}`;
+      }
+
+      const selectedUnitFilter = document.getElementById('calFilterUnitSelect')?.value || 'all';
+
+      // First day of month (0 = Sun, 1 = Mon...)
+      const firstDay = new Date(yVal, mIdx, 1).getDay();
+      // Number of days in current month
+      const daysInMonth = new Date(yVal, mIdx + 1, 0).getDate();
+      // Days in previous month
+      const daysInPrevMonth = new Date(yVal, mIdx, 0).getDate();
+
+      const todayStr = getTodayString();
+      gridElem.innerHTML = '';
+
+      // 1. Previous month trailing days
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const dayNum = daysInPrevMonth - i;
+        const prevMonthDate = new Date(yVal, mIdx - 1, dayNum);
+        const dateStr = prevMonthDate.toISOString().slice(0, 10);
+        gridElem.appendChild(createCalCell(dayNum, dateStr, true, todayStr, selectedUnitFilter));
+      }
+
+      // 2. Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const curDate = new Date(yVal, mIdx, d);
+        const mm = String(mIdx + 1).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        const dateStr = `${yVal}-${mm}-${dd}`;
+        gridElem.appendChild(createCalCell(d, dateStr, false, todayStr, selectedUnitFilter));
+      }
+
+      // 3. Next month leading days to complete full grid (multiple of 7)
+      const totalCells = firstDay + daysInMonth;
+      const remainingCells = (7 - (totalCells % 7)) % 7;
+      for (let j = 1; j <= remainingCells; j++) {
+        const nextDate = new Date(yVal, mIdx + 1, j);
+        const dateStr = nextDate.toISOString().slice(0, 10);
+        gridElem.appendChild(createCalCell(j, dateStr, true, todayStr, selectedUnitFilter));
+      }
+    }
+
+    function createCalCell(dayNum, dateStr, isOtherMonth, todayStr, filterUnit) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell' + (isOtherMonth ? ' other-month' : '') + (dateStr === todayStr ? ' today' : '');
+      cell.onclick = () => openDayDetailsModal(dateStr);
+
+      const header = document.createElement('div');
+      header.className = 'cal-cell-header';
+      header.innerHTML = `<span class="cal-cell-num">${dayNum}</span>`;
+      cell.appendChild(header);
+
+      const list = document.createElement('div');
+      list.className = 'cal-event-list';
+
+      // Find logs on this date
+      const matchedLogs = acLogs.filter(l => {
+        if (l.date !== dateStr) return false;
+        if (filterUnit !== 'all' && l.unit_id !== filterUnit && l.room !== filterUnit) return false;
+        return true;
+      });
+
+      // Find due units on this date
+      const matchedDues = acUnits.filter(u => {
+        if (u.next_due !== dateStr) return false;
+        if (filterUnit !== 'all' && u.id !== filterUnit && u.room !== filterUnit) return false;
+        return true;
+      });
+
+      // Render Completed / Scheduled Chips
+      matchedLogs.forEach(l => {
+        const chip = document.createElement('div');
+        const isCompleted = (l.status === 'completed' || !l.status);
+        chip.className = `cal-chip ${isCompleted ? 'cleaned' : 'scheduled'}`;
+        chip.title = `${l.room} - ${l.type} (${isCompleted ? 'ล้างแล้ว' : 'นัดหมาย'})`;
+        chip.innerHTML = `<span>${isCompleted ? '❄️' : '📅'}</span> <span>${escapeHtml(l.room || 'แอร์')}</span>`;
+        list.appendChild(chip);
+      });
+
+      // Render Due Chips
+      matchedDues.forEach(u => {
+        const hasLog = matchedLogs.some(l => l.unit_id === u.id || l.room === u.room);
+        if (!hasLog) {
+          const chip = document.createElement('div');
+          chip.className = 'cal-chip due';
+          chip.title = `${u.room} ถึงรอบล้าง 90 วัน`;
+          chip.innerHTML = `<span>⏰</span> <span>${escapeHtml(u.room)}</span>`;
+          list.appendChild(chip);
+        }
+      });
+
+      cell.appendChild(list);
+      return cell;
+    }
+
+    function prevCalMonth() {
+      calCurrentMonth--;
+      if (calCurrentMonth < 0) {
+        calCurrentMonth = 11;
+        calCurrentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextCalMonth() {
+      calCurrentMonth++;
+      if (calCurrentMonth > 11) {
+        calCurrentMonth = 0;
+        calCurrentYear++;
+      }
+      renderCalendar();
+    }
+
+    function todayCalMonth() {
+      const now = new Date();
+      calCurrentYear = now.getFullYear();
+      calCurrentMonth = now.getMonth();
+      renderCalendar();
+    }
+
+    /* Day details popup */
+    function openDayDetailsModal(dateStr) {
+      selectedCalDayStr = dateStr;
+      document.getElementById('dayDetailsModalTitle').textContent = `🗓️ รายการวันที่ ${formatThaiDate(dateStr)}`;
+
+      const container = document.getElementById('dayDetailsItemsContainer');
+      container.innerHTML = '';
+
+      const matchedLogs = acLogs.filter(l => l.date === dateStr);
+      const matchedDues = acUnits.filter(u => u.next_due === dateStr);
+
+      if (matchedLogs.length === 0 && matchedDues.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted);">ไม่มีรายการล้างแอร์หรือนัดหมายในวันนี้</div>`;
+      } else {
+        matchedLogs.forEach(l => {
+          const isCompleted = (l.status === 'completed' || !l.status);
+          const div = document.createElement('div');
+          div.style = "background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px 14px;";
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:700; font-size:14.5px; color:var(--text);">❄️ ${escapeHtml(l.room)}</span>
+              <span class="badge ${isCompleted ? 'badge-ok' : 'badge-info'}">${isCompleted ? '✅ ล้างแล้ว' : '📅 นัดหมาย'}</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+              ประเภท: <strong>${escapeHtml(l.type || 'ล้างใหญ่')}</strong>
+              ${l.technician ? ` • ช่าง: <strong>${escapeHtml(l.technician)}</strong>` : ''}
+              ${l.cost ? ` • ค่าใช้จ่าย: <strong>฿${formatNumber(l.cost, 2)}</strong>` : ''}
+            </div>
+            ${l.note ? `<div style="font-size:12px; color:#475569; margin-top:4px; font-style:italic;">"${escapeHtml(l.note)}"</div>` : ''}
+          `;
+          container.appendChild(div);
+        });
+
+        matchedDues.forEach(u => {
+          const hasLog = matchedLogs.some(l => l.unit_id === u.id || l.room === u.room);
+          if (!hasLog) {
+            const div = document.createElement('div');
+            div.style = "background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:12px 14px;";
+            div.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-size:14.5px; color:#991b1b;">⏰ ครบรอบล้างแอร์: ${escapeHtml(u.room)}</span>
+                <span class="badge badge-out">ถึงกำหนด 90 วัน</span>
+              </div>
+              <div style="font-size:12px; color:#b91c1c; margin-top:4px;">
+                ล้างล่าสุดเมื่อ: ${formatThaiDate(u.last_cleaned)} • ${escapeHtml(u.brand_btu || '')}
+              </div>
+            `;
+            container.appendChild(div);
+          }
+        });
+      }
+
+      document.getElementById('btnDayDetailsAddLog').onclick = () => {
+        closeModal('modalDayDetails');
+        openLogACCleanModal(selectedCalDayStr);
+      };
+
+      openModal('modalDayDetails');
+    }
+
+    /* --- AC UNIT MANAGEMENT --- */
+    function openAddACUnitModal(unitId = null) {
+      const form = document.getElementById('formACUnit');
+      form.reset();
+      document.getElementById('acUnitId').value = '';
+
+      if (unitId) {
+        const u = acUnits.find(x => x.id === unitId);
+        if (u) {
+          document.getElementById('acUnitModalTitle').textContent = '✏️ แก้ไขข้อมูลเครื่องปรับอากาศ';
+          document.getElementById('acUnitId').value = u.id;
+          document.getElementById('acUnitRoom').value = u.room || '';
+          document.getElementById('acUnitBrandBtu').value = u.brand_btu || '';
+          document.getElementById('acUnitLastCleaned').value = u.last_cleaned || getTodayString();
+          document.getElementById('acUnitCycleDays').value = u.cycle_days || 90;
+          document.getElementById('acUnitNote').value = u.note || '';
+        }
+      } else {
+        document.getElementById('acUnitModalTitle').textContent = '➕ เพิ่มเครื่องปรับอากาศ / ห้อง';
+        document.getElementById('acUnitLastCleaned').value = getTodayString();
+        document.getElementById('acUnitCycleDays').value = 90;
+      }
+
+      openModal('modalAddACUnit');
+    }
+
+    async function handleSaveACUnit(e) {
+      e.preventDefault();
+      const id = document.getElementById('acUnitId').value;
+      const room = document.getElementById('acUnitRoom').value.trim();
+      const brand_btu = document.getElementById('acUnitBrandBtu').value.trim();
+      const last_cleaned = document.getElementById('acUnitLastCleaned').value;
+      const cycle_days = parseInt(document.getElementById('acUnitCycleDays').value, 10) || 90;
+      const note = document.getElementById('acUnitNote').value.trim();
+
+      const next_due = addDaysToDate(last_cleaned, cycle_days);
+
+      try {
+        if (id) {
+          await db.collection(`${collectionPrefix}_ac_units`).doc(id).update({
+            room, brand_btu, last_cleaned, cycle_days, next_due, note,
+            updated_at: new Date().toISOString()
+          });
+          showToast(`แก้ไขข้อมูล "${room}" สำเร็จ`, 'success');
+        } else {
+          await db.collection(`${collectionPrefix}_ac_units`).add({
+            room, brand_btu, last_cleaned, cycle_days, next_due, note,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast(`เพิ่มเครื่องแอร์ห้อง "${room}" เรียบร้อย 🎉`, 'success');
+        }
+
+        playBeep('success');
+        closeModal('modalAddACUnit');
+      } catch (err) {
+        showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      }
+    }
+
+    async function confirmDeleteACUnit(unitId, room) {
+      if (!confirm(`ต้องการลบเครื่องปรับอากาศ "${room}" ออกจากระบบใช่หรือไม่?`)) return;
+      try {
+        await db.collection(`${collectionPrefix}_ac_units`).doc(unitId).delete();
+        playBeep('warning');
+        showToast(`ลบเครื่องแอร์ห้อง "${room}" เรียบร้อย`, 'success');
+      } catch (err) {
+        showToast(`ลบล้มเหลว: ${err.message}`, 'error');
+      }
+    }
+
+    /* --- AC TRACKER CARDS (90 DAYS) --- */
+    function renderACTrackerCards() {
+      const container = document.getElementById('acUnitsGridContainer');
+      if (!container) return;
+
+      const q = (document.getElementById('acSearchInput')?.value || '').trim().toLowerCase();
+      const statusFilter = document.getElementById('acStatusFilter')?.value || 'all';
+
+      const filtered = acUnits.filter(u => {
+        const room = (u.room || '').toLowerCase();
+        const brand = (u.brand_btu || '').toLowerCase();
+        const matchQ = !q || room.includes(q) || brand.includes(q);
+
+        const cycleDays = u.cycle_days || 90;
+        const daysPassed = getDaysDiffFromToday(u.last_cleaned);
+        const remaining = cycleDays - daysPassed;
+
+        let matchStatus = true;
+        if (statusFilter === 'due') matchStatus = (remaining <= 0);
+        else if (statusFilter === 'warning') matchStatus = (remaining > 0 && remaining <= 15);
+        else if (statusFilter === 'ok') matchStatus = (remaining > 15);
+
+        return matchQ && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: 14px; border: 1px solid var(--border);">
+            <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
+            <div style="font-weight: 600; color: #475569;">ไม่พบรายการเครื่องปรับอากาศ</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">แตะปุ่ม "+ เพิ่มเครื่องแอร์/ห้อง" เพื่อเริ่มต้นบันทึก</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(u => {
+        const cycleDays = u.cycle_days || 90;
+        const daysPassed = getDaysDiffFromToday(u.last_cleaned);
+        const remaining = cycleDays - daysPassed;
+        const pct = Math.min(100, Math.max(0, Math.round((daysPassed / cycleDays) * 100)));
+
+        let statusClass = 'ok';
+        let statusText = `🟢 ปกติ (เหลือ ${remaining} วัน)`;
+        let barColor = '#10b981';
+
+        if (remaining <= 0) {
+          statusClass = 'danger';
+          statusText = `🔴 ถึงรอบล้างด่วน! (เกิน ${Math.abs(remaining)} วัน)`;
+          barColor = '#ef4444';
+        } else if (remaining <= 15) {
+          statusClass = 'warning';
+          statusText = `🟡 ใกล้ถึงรอบ (เหลือ ${remaining} วัน)`;
+          barColor = '#f59e0b';
+        }
+
+        return `
+          <div class="ac-card">
+            <div class="ac-card-header">
+              <div>
+                <div class="ac-card-title">❄️ ${escapeHtml(u.room)}</div>
+                <div class="ac-card-sub">${escapeHtml(u.brand_btu || 'ไม่ระบุสเปก')}</div>
+              </div>
+              <span class="ac-status-badge ${statusClass}">${statusText}</span>
+            </div>
+
+            <div class="ac-meter">
+              <div class="ac-meter-bar" style="width: ${pct}%; background: ${barColor};"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <div class="ac-info-row">
+                <span>ล้างล่าสุดเมื่อ:</span>
+                <strong>${formatThaiDate(u.last_cleaned)} (${daysPassed} วันที่แล้ว)</strong>
+              </div>
+              <div class="ac-info-row">
+                <span>กำหนดรอบถัดไป:</span>
+                <strong style="color: ${remaining <= 0 ? 'var(--danger)' : 'var(--text)'};">${formatThaiDate(u.next_due)}</strong>
+              </div>
+              <div class="ac-info-row">
+                <span>รอบการล้าง:</span>
+                <span>ทุกๆ ${cycleDays} วัน</span>
+              </div>
+            </div>
+
+            ${u.note ? `<div style="font-size:11.5px; color:var(--text-muted); background:#f8fafc; padding:6px 10px; border-radius:6px;">"${escapeHtml(u.note)}"</div>` : ''}
+
+            <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+              <button class="btn btn-success btn-sm" style="flex:1;" onclick="quickMarkACCleaned('${u.id}')" title="บันทึกว่าล้างเรียบร้อยแล้วในวันนี้">
+                ✅ ล้างแอร์แล้ววันนี้
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="openLogACCleanModal(null, '${u.id}')" title="ลงบันทึกพร้อมกรอกรายละเอียด">
+                📝 ลงบันทึก
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="openAddACUnitModal('${u.id}')" title="แก้ไข">
+                ✏️
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDeleteACUnit('${u.id}', '${escapeHtml(u.room)}')" title="ลบ">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function quickMarkACCleaned(unitId) {
+      const u = acUnits.find(x => x.id === unitId);
+      if (!u) return;
+
+      const today = getTodayString();
+      if (!confirm(`ยืนยันการบันทึกว่าล้างเครื่องแอร์ "${u.room}" เรียบร้อยแล้วในวันนี้ (${formatThaiDate(today)}) ใช่หรือไม่?`)) return;
+
+      const cycleDays = u.cycle_days || 90;
+      const nextDue = addDaysToDate(today, cycleDays);
+
+      try {
+        const batch = db.batch();
+
+        const unitRef = db.collection(`${collectionPrefix}_ac_units`).doc(unitId);
+        batch.update(unitRef, {
+          last_cleaned: today,
+          next_due: nextDue,
+          updated_at: new Date().toISOString()
+        });
+
+        const logRef = db.collection(`${collectionPrefix}_ac_logs`).doc();
+        batch.set(logRef, {
+          unit_id: unitId,
+          room: u.room,
+          date: today,
+          type: 'ล้างใหญ่ประจำรอบ',
+          status: 'completed',
+          technician: 'บันทึกด่วน',
+          cost: 0,
+          note: `ล้างแอร์รอบ 90 วัน เรียบร้อย (รอบถัดไป: ${formatThaiDate(nextDue)})`,
+          images: [],
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await batch.commit();
+
+        playBeep('success');
+        showToast(`บันทึกการล้างแอร์ "${u.room}" สำเร็จ! รอบถัดไปคือ ${formatThaiDate(nextDue)} ❄️`, 'success');
+      } catch (err) {
+        showToast(`บันทึกล้มเหลว: ${err.message}`, 'error');
+      }
+    }
+
+    /* --- LOG / SCHEDULE AC CLEAN FORM --- */
+    function openLogACCleanModal(prefilledDate = null, prefilledUnitId = null) {
+      const form = document.getElementById('formACLog');
+      form.reset();
+      document.getElementById('acLogId').value = '';
+      acLogImgFiles = [];
+      document.getElementById('acLogImgPreviewArea').innerHTML = '';
+
+      updateACSelectDropdowns();
+
+      document.getElementById('acLogDate').value = prefilledDate || getTodayString();
+
+      if (prefilledUnitId) {
+        document.getElementById('acLogUnitSelect').value = prefilledUnitId;
+      }
+
+      openModal('modalLogACClean');
+    }
+
+    function onACLogUnitChange() {}
+
+    async function handleSaveACLog(e) {
+      e.preventDefault();
+      const unitId = document.getElementById('acLogUnitSelect').value;
+      const date = document.getElementById('acLogDate').value;
+      const type = document.getElementById('acLogType').value;
+      const status = document.getElementById('acLogStatus').value;
+      const technician = document.getElementById('acLogTechnician').value.trim();
+      const cost = parseFloat(document.getElementById('acLogCost').value) || 0;
+      const note = document.getElementById('acLogNote').value.trim();
+
+      const unit = acUnits.find(u => u.id === unitId);
+      const roomName = unit ? unit.room : 'เครื่องปรับอากาศ';
+
+      try {
+        const imageUrls = await processImagesToBase64(acLogImgFiles);
+
+        const batch = db.batch();
+        const logRef = db.collection(`${collectionPrefix}_ac_logs`).doc();
+        batch.set(logRef, {
+          unit_id: unitId,
+          room: roomName,
+          date,
+          type,
+          status,
+          technician,
+          cost,
+          note,
+          images: imageUrls,
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        if (status === 'completed' && unit) {
+          const cycleDays = unit.cycle_days || 90;
+          const nextDue = addDaysToDate(date, cycleDays);
+          const unitRef = db.collection(`${collectionPrefix}_ac_units`).doc(unit.id);
+          batch.update(unitRef, {
+            last_cleaned: date,
+            next_due: nextDue,
+            updated_at: new Date().toISOString()
+          });
+        }
+
+        await batch.commit();
+
+        playBeep('success');
+        showToast(`บันทึกข้อมูลการล้างแอร์ "${roomName}" เรียบร้อยแล้ว! ❄️`, 'success');
+        closeModal('modalLogACClean');
+      } catch (err) {
+        showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      }
+    }
+
+    /* --- AC HISTORY LOGS TABLE --- */
+    function renderACHistoryTable() {
+      const tbody = document.getElementById('acHistoryTableBody');
+      if (!tbody) return;
+
+      const q = (document.getElementById('acHistSearchInput')?.value || '').trim().toLowerCase();
+
+      const filtered = acLogs.filter(l => {
+        const room = (l.room || '').toLowerCase();
+        const tech = (l.technician || '').toLowerCase();
+        const note = (l.note || '').toLowerCase();
+        return !q || room.includes(q) || tech.includes(q) || note.includes(q);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:30px; color:var(--text-muted);">ไม่พบประวัติการล้างแอร์</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(l => {
+        const isCompleted = (l.status === 'completed' || !l.status);
+        const badge = isCompleted ? '<span class="badge badge-ok">✅ ล้างแล้ว</span>' : '<span class="badge badge-info">📅 นัดหมาย</span>';
+        const costStr = l.cost > 0 ? `฿${formatNumber(l.cost, 2)}` : '-';
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:600;">${formatThaiDate(l.date)}</div>
+            </td>
+            <td style="font-weight:700; color:var(--text);">❄️ ${escapeHtml(l.room)}</td>
+            <td><span class="badge badge-info">${escapeHtml(l.type || 'ล้างใหญ่')}</span></td>
+            <td>${escapeHtml(l.technician || '-')}</td>
+            <td class="text-right" style="font-weight:600;">${costStr}</td>
+            <td>${badge}</td>
+            <td>${escapeHtml(l.note || '-')}</td>
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm" onclick="deleteACLog('${l.id}', '${escapeHtml(l.room)}')" title="ลบรายการนี้">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function deleteACLog(logId, room) {
+      if (!confirm(`ต้องการลบรายการบันทึกของ "${room}" ใช่หรือไม่?`)) return;
+      try {
+        await db.collection(`${collectionPrefix}_ac_logs`).doc(logId).delete();
+        playBeep('warning');
+        showToast('ลบรายการบันทึกเรียบร้อย', 'success');
+      } catch (err) {
+        showToast(`ลบล้มเหลว: ${err.message}`, 'error');
+      }
+    }
+
+    function exportACLogsCSV() {
+      const headers = ['วันที่', 'ห้อง_เครื่องแอร์', 'ประเภทงาน', 'ช่างผู้ดูแล', 'ค่าใช้จ่าย', 'สถานะ', 'หมายเหตุ'];
+      const rows = acLogs.map(l => [
+        l.date,
+        l.room || '',
+        l.type || '',
+        l.technician || '',
+        l.cost || 0,
+        l.status || '',
+        l.note || ''
+      ]);
+      exportCSVFile(headers, rows, `ac_cleaning_history_${getTodayString()}.csv`);
+    }
+
+    /* Update Dropdowns for selecting AC unit */
+    function updateACSelectDropdowns() {
+      const calSel = document.getElementById('calFilterUnitSelect');
+      if (calSel) {
+        const curVal = calSel.value;
+        calSel.innerHTML = '<option value="all">ทุกห้อง / ทุกเครื่อง</option>';
+        acUnits.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = `❄️ ${u.room}`;
+          calSel.appendChild(opt);
+        });
+        if (curVal && acUnits.some(u => u.id === curVal)) calSel.value = curVal;
+      }
+
+      const logSel = document.getElementById('acLogUnitSelect');
+      if (logSel) {
+        const curVal = logSel.value;
+        logSel.innerHTML = '<option value="">-- กรุณาเลือกเครื่องแอร์ --</option>';
+        acUnits.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = `❄️ ${u.room} (${u.brand_btu || 'ไม่ระบุ'})`;
+          logSel.appendChild(opt);
+        });
+        if (curVal && acUnits.some(u => u.id === curVal)) logSel.value = curVal;
+      }
+    }
+
+    /* Update Dashboard AC KPI and Banner */
+    function updateACKpis() {
+      let dueCount = 0;
+      let warningCount = 0;
+
+      acUnits.forEach(u => {
+        const cycleDays = u.cycle_days || 90;
+        const daysPassed = getDaysDiffFromToday(u.last_cleaned);
+        const remaining = cycleDays - daysPassed;
+        if (remaining <= 0) dueCount++;
+        else if (remaining <= 15) warningCount++;
+      });
+
+      const kpiVal = document.getElementById('kpiAcDue');
+      const kpiSub = document.getElementById('kpiAcSub');
+      if (kpiVal) {
+        kpiVal.textContent = dueCount;
+        kpiVal.style.color = dueCount > 0 ? '#dc2626' : (warningCount > 0 ? '#d97706' : '#0284c7');
+      }
+      if (kpiSub) {
+        kpiSub.textContent = dueCount > 0 ? `เกินกำหนด ${dueCount} เครื่อง!` : (warningCount > 0 ? `ใกล้ครบ ${warningCount} เครื่อง` : 'พร้อมใช้งานปกติ');
+      }
+
+      const pill = document.getElementById('acDuePill');
+      if (pill) {
+        if (dueCount > 0) {
+          pill.style.display = 'inline-block';
+          pill.style.background = '#dc2626';
+          pill.textContent = dueCount;
+        } else if (warningCount > 0) {
+          pill.style.display = 'inline-block';
+          pill.style.background = '#d97706';
+          pill.textContent = warningCount;
+        } else {
+          pill.style.display = 'none';
+        }
+      }
+
+      const banner = document.getElementById('acDueBanner');
+      const bannerMsg = document.getElementById('acDueBannerMsg');
+      if (banner && bannerMsg) {
+        if (dueCount > 0) {
+          banner.style.display = 'flex';
+          banner.style.borderLeftColor = '#dc2626';
+          bannerMsg.textContent = `มีเครื่องปรับอากาศถึงกำหนดล้างแอร์รอบ 90 วันแล้ว ${dueCount} เครื่อง กรุณาตรวจสอบและนัดช่าง`;
+          bannerMsg.style.color = '#991b1b';
+        } else if (warningCount > 0) {
+          banner.style.display = 'flex';
+          banner.style.borderLeftColor = '#f59e0b';
+          bannerMsg.textContent = `มีเครื่องปรับอากาศใกล้ถึงรอบล้าง (เหลือไม่เกิน 15 วัน) ${warningCount} เครื่อง`;
+          bannerMsg.style.color = '#92400e';
+        } else {
+          banner.style.display = 'none';
+        }
       }
     }
 
