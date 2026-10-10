@@ -1146,7 +1146,7 @@
 
       <div class="sidebar-foot">
         <span>⚡ Cloud Realtime Sync</span>
-        <span id="versionTag">v2.6</span>
+        <span id="versionTag">v2.7</span>
       </div>
     </aside>
 
@@ -1650,23 +1650,49 @@
       <section id="view-ac-calendar" class="view-container">
         <div class="view-header">
           <div class="view-title">
-            <h2>❄️ ปฏิทินล้างแอร์ & วันที่ล้างล่าสุด</h2>
-            <p>ลงบันทึกวันที่ล้างแอร์ล่าสุดของแต่ละห้อง พร้อมติดตามรอบกำหนด 90 วันบนปฏิทินแบบเรียลไทม์</p>
+            <h2>❄️ ระบบล้างแอร์บ้านพัก & ปฏิทินรอบ 90 วัน</h2>
+            <p>กดเข้าปฏิทินบ้านแต่ละหลังเพื่อลงบันทึกการล้างแอร์ย้อนหลัง และตรวจสอบว่าล้างครั้งล่าสุดเมื่อไหร่</p>
           </div>
           <div class="view-actions">
-            <button class="btn btn-primary btn-sm" onclick="openLogACCleanModal()">❄️ ลงบันทึกวันที่ล้างแอร์ล่าสุด</button>
+            <button class="btn btn-outline btn-sm" onclick="createSampleHouses()">⚡ สร้างบ้านตัวอย่าง (บ้าน 1-5)</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddACUnitModal()">➕ เพิ่มบ้านพัก</button>
           </div>
         </div>
 
         <!-- Sub Tabs -->
         <div class="sub-tabs">
-          <button class="btn btn-primary btn-sm" id="btnTabAcCalendar" onclick="switchAcSubTab('calendar')">📅 ปฏิทินงานล้างแอร์</button>
-          <button class="btn btn-outline btn-sm" id="btnTabAcTracker" onclick="switchAcSubTab('tracker')">❄️ รายการห้อง & วันที่ล้างล่าสุด</button>
-          <button class="btn btn-outline btn-sm" id="btnTabAcHistory" onclick="switchAcSubTab('history')">📜 ประวัติการล้างแอร์</button>
+          <button class="btn btn-primary btn-sm" id="btnTabAcTracker" onclick="switchAcSubTab('tracker')">🏠 บ้านพักแต่ละหลัง (ปฏิทิน & ล้างแอร์)</button>
+          <button class="btn btn-outline btn-sm" id="btnTabAcCalendar" onclick="switchAcSubTab('calendar')">🗓️ ปฏิทินรวมทุกบ้าน</button>
+          <button class="btn btn-outline btn-sm" id="btnTabAcHistory" onclick="switchAcSubTab('history')">📜 ประวัติการล้างทั้งหมด</button>
         </div>
 
-        <!-- SUB-VIEW 1: CALENDAR VIEW -->
-        <div id="acSubViewCalendar">
+        <!-- SUB-VIEW 1: AC TRACKER CARDS (HOUSES) - DEFAULT -->
+        <div id="acSubViewTracker">
+          <div class="card" style="padding: 14px 18px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 240px;">
+                <input type="text" id="acSearchInput" class="form-control" placeholder="🔍 ค้นหาชื่อบ้านพัก..." oninput="renderACTrackerCards()">
+                <select id="acStatusFilter" class="form-control" style="width: 170px;" onchange="renderACTrackerCards()">
+                  <option value="all">สถานะทั้งหมด</option>
+                  <option value="due">🔴 เกิน 90 วัน (ต้องล้างด่วน!)</option>
+                  <option value="warning">🟡 ใกล้ถึงรอบ (เหลือ ≤ 15 วัน)</option>
+                  <option value="ok">🟢 ปกติ (เพิ่งล้าง)</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="createSampleHouses()">⚡ สร้างบ้านตัวอย่าง (บ้าน 1-5)</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddACUnitModal()">➕ เพิ่มบ้านพักใหม่</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ac-grid" id="acUnitsGridContainer">
+            <!-- House Cards rendered via JS -->
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 2: CALENDAR OVERVIEW -->
+        <div id="acSubViewCalendar" style="display: none;">
           <div class="card" style="padding: 18px 20px;">
             <div class="cal-controls">
               <div class="cal-title" id="calCurrentMonthTitle">
@@ -1677,7 +1703,7 @@
                 <button class="btn btn-outline btn-sm" onclick="todayCalMonth()">วันนี้</button>
                 <button class="btn btn-secondary btn-sm" onclick="nextCalMonth()">เดือนถัดไป ▶</button>
                 <select id="calFilterUnitSelect" class="form-control" style="width: 180px; padding: 6px 10px; font-size: 12.5px;" onchange="renderCalendar()">
-                  <option value="all">ทุกห้อง / ทุกเครื่อง</option>
+                  <option value="all">ทุกบ้าน / ทุกห้อง</option>
                 </select>
               </div>
             </div>
@@ -1695,28 +1721,6 @@
             <div class="cal-days-grid" id="calDaysGridContainer">
               <!-- Calendar day cells rendered via JS -->
             </div>
-          </div>
-        </div>
-
-        <!-- SUB-VIEW 2: AC TRACKER CARDS (90 DAYS) -->
-        <div id="acSubViewTracker" style="display: none;">
-          <div class="card" style="padding: 14px 18px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 240px;">
-                <input type="text" id="acSearchInput" class="form-control" placeholder="🔍 ค้นหาชื่อห้อง, ยี่ห้อ, สถานที่..." oninput="renderACTrackerCards()">
-                <select id="acStatusFilter" class="form-control" style="width: 170px;" onchange="renderACTrackerCards()">
-                  <option value="all">สถานะทั้งหมด</option>
-                  <option value="due">🔴 ถึงกำหนดล้างด่วน! (≥ 90 วัน)</option>
-                  <option value="warning">🟡 ใกล้ถึงรอบ (เหลือ ≤ 15 วัน)</option>
-                  <option value="ok">🟢 ปกติ เพิ่งล้าง</option>
-                </select>
-              </div>
-              <button class="btn btn-primary btn-sm" onclick="openLogACCleanModal()">❄️ ลงบันทึกวันที่ล้างแอร์ล่าสุด</button>
-            </div>
-          </div>
-
-          <div class="ac-grid" id="acUnitsGridContainer">
-            <!-- AC Unit Cards rendered via JS -->
           </div>
         </div>
 
@@ -1930,11 +1934,11 @@
     </div>
   </div>
 
-  <!-- Modal 1: Add / Edit AC Unit -->
+  <!-- Modal 1: Add / Edit House -->
   <div class="modal-overlay" id="modalAddACUnit">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="acUnitModalTitle">➕ เพิ่มเครื่องปรับอากาศ / ห้อง</h3>
+        <h3 id="acUnitModalTitle">➕ เพิ่มบ้านพัก / ห้อง</h3>
         <button class="modal-close" onclick="closeModal('modalAddACUnit')">✕</button>
       </div>
       <div class="modal-body">
@@ -1942,41 +1946,127 @@
           <input type="hidden" id="acUnitId">
           <div class="form-grid">
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label>ชื่อห้อง / ตำแหน่งที่ติดตั้ง <span style="color: var(--danger);">*</span></label>
-              <input type="text" id="acUnitRoom" class="form-control" placeholder="เช่น บ้านพัก A1, ห้องรับรอง VIP, ออฟฟิศ, โซน ATV" required>
+              <label>ชื่อบ้านพัก / ห้อง <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="acUnitRoom" class="form-control" placeholder="เช่น บ้าน 1, บ้าน 2, บ้านพักริมสระ, ห้อง 101" required>
             </div>
             <div class="form-group">
-              <label>ยี่ห้อ / ขนาด BTU</label>
-              <input type="text" id="acUnitBrandBtu" class="form-control" placeholder="เช่น Daikin Inverter 18,000 BTU">
+              <label>ยี่ห้อแอร์ / รุ่น</label>
+              <input type="text" id="acUnitBrandBtu" class="form-control" placeholder="เช่น Daikin Inverter 18,000 BTU (ไม่บังคับ)">
             </div>
             <div class="form-group">
-              <label>วันที่ล้างล่าสุด <span style="color: var(--danger);">*</span></label>
-              <input type="date" id="acUnitLastCleaned" class="form-control" required>
+              <label>วันที่ล้างแอร์ล่าสุด (ใส่วันที่ย้อนหลังได้)</label>
+              <input type="date" id="acUnitLastCleaned" class="form-control">
+              <span class="input-hint">หากยังไม่เคยล้าง หรือต้องการลงในปฏิทินทีหลัง สามารถเว้นว่างไว้ได้</span>
             </div>
             <div class="form-group">
               <label>รอบแจ้งเตือนล้างแอร์ (วัน)</label>
               <input type="number" id="acUnitCycleDays" class="form-control" value="90" min="30" max="365" required>
-              <span class="input-hint">ค่ามาตรฐานทั่วไปคือ 90 วัน (ประมาณ 3 เดือน)</span>
+              <span class="input-hint">ค่ามาตรฐาน 90 วัน (ประมาณ 3 เดือน)</span>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
               <label>หมายเหตุ / รายละเอียดเพิ่มเติม</label>
-              <textarea id="acUnitNote" class="form-control" placeholder="เช่น ติดตั้งชั้น 2, ประกันหมดปีหน้า"></textarea>
+              <textarea id="acUnitNote" class="form-control" placeholder="เช่น ติดตั้งชั้น 2, เบอร์ช่างประจำ (ไม่บังคับ)"></textarea>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modalAddACUnit')">ยกเลิก</button>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('formACUnit').requestSubmit()">บันทึกข้อมูลเครื่องแอร์</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('formACUnit').requestSubmit()">💾 บันทึกบ้านพัก</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 2: Record Latest AC Cleaning Date -->
+  <!-- Modal: Dedicated House Calendar & Past Cleaning Logs -->
+  <div class="modal-overlay" id="modalHouseCalendar">
+    <div class="modal-card" style="max-width: 760px;">
+      <div class="modal-header" style="background: #f8fafc; border-bottom: 1px solid var(--border);">
+        <div>
+          <h3 id="houseCalModalTitle" style="font-size: 18px; display: flex; align-items: center; gap: 8px;">
+            🏠 ปฏิทินล้างแอร์: <span id="houseCalRoomName" style="color: var(--primary);">บ้านพัก</span>
+          </h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+            คลิกช่องวันที่ในปฏิทินเพื่อลงบันทึกย้อนหลัง หรือกดปุ่มบันทึกล้างแอร์
+          </p>
+        </div>
+        <button class="modal-close" onclick="closeModal('modalHouseCalendar')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 16px 20px;">
+        <!-- Top Status Ribbon -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+          <div>
+            <div style="font-size: 12.5px; color: #166534; font-weight: 500;">
+              ❄️ ล้างแอร์ครั้งล่าสุดเมื่อ: <strong id="houseCalLastCleanedDate" style="font-size: 15px; color: #14532d;">-</strong>
+            </div>
+            <div style="font-size: 12px; color: #15803d; margin-top: 3px;" id="houseCalNextDueText">
+              📅 กำหนดรอบถัดไป 90 วัน: -
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="openLogForCurrentHouse()" style="font-weight: 700; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+              ❄️ ลงบันทึกล้างแอร์ (ใส่วันที่ย้อนหลังได้)
+            </button>
+            <button class="btn btn-success btn-sm" onclick="quickCleanCurrentHouse()">
+              ✅ เพิ่งล้างวันนี้
+            </button>
+          </div>
+        </div>
+
+        <!-- Month Navigation Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h4 id="houseCalMonthTitle" style="font-size: 16px; font-weight: 700; color: var(--text);">
+            🗓️ ตุลาคม 2569
+          </h4>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" onclick="prevHouseCalMonth()">◀ เดือนก่อน</button>
+            <button class="btn btn-outline btn-sm" onclick="todayHouseCalMonth()">เดือนนี้</button>
+            <button class="btn btn-secondary btn-sm" onclick="nextHouseCalMonth()">เดือนถัดไป ▶</button>
+          </div>
+        </div>
+
+        <!-- House Calendar Grid -->
+        <div class="cal-grid" style="margin-bottom: 20px;">
+          <div class="cal-grid-weekdays">
+            <div class="cal-weekday weekend">อา.</div>
+            <div class="cal-weekday">จ.</div>
+            <div class="cal-weekday">อ.</div>
+            <div class="cal-weekday">พ.</div>
+            <div class="cal-weekday">พฤ.</div>
+            <div class="cal-weekday">ศ.</div>
+            <div class="cal-weekday weekend">ส.</div>
+          </div>
+          <div class="cal-days-grid" id="houseCalDaysGrid" style="grid-auto-rows: minmax(70px, 1fr);">
+            <!-- Day cells for this house -->
+          </div>
+        </div>
+
+        <!-- House Cleaning Logs History Section -->
+        <div style="border-top: 1px solid var(--border); padding-top: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h4 style="font-size: 14.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px;">
+              📜 ประวัติการล้างแอร์ย้อนหลังทั้งหมดของบ้านหลังนี้
+            </h4>
+            <span id="houseCalLogCount" style="font-size: 12px; color: var(--text-muted);">0 รายการ</span>
+          </div>
+
+          <div id="houseCalHistoryList" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto;">
+            <!-- History items sorted newest to oldest -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalHouseCalendar')">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Record AC Cleaning (Supports Back-dates) -->
   <div class="modal-overlay" id="modalLogACClean">
     <div class="modal-card" style="max-width: 560px;">
       <div class="modal-header">
-        <h3 id="acLogModalTitle">❄️ ลงบันทึกวันที่ล้างแอร์ล่าสุด</h3>
+        <h3 id="acLogModalTitle">❄️ ลงบันทึกการล้างแอร์ (ใส่วันที่ย้อนหลังได้)</h3>
         <button class="modal-close" onclick="closeModal('modalLogACClean')">✕</button>
       </div>
       <div class="modal-body">
@@ -1985,15 +2075,16 @@
           <input type="hidden" id="acLogUnitId">
           <div class="form-grid">
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label>ชื่อห้อง / ตำแหน่งเครื่องแอร์ <span style="color: var(--danger);">*</span></label>
-              <input type="text" id="acLogRoomInput" class="form-control" list="acRoomListDatalist" placeholder="พิมพ์ชื่อห้อง เช่น ห้อง 1, ห้อง 2, บ้านพัก A, ออฟฟิศ" required oninput="onACLogRoomInputChanged()">
+              <label>ชื่อบ้านพัก / ห้อง <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="acLogRoomInput" class="form-control" list="acRoomListDatalist" placeholder="พิมพ์ชื่อห้อง เช่น บ้าน 1, บ้าน 2, ห้อง 101" required oninput="onACLogRoomInputChanged()">
               <datalist id="acRoomListDatalist"></datalist>
               <div id="acLogRoomHint" style="font-size: 11.5px; margin-top: 3px;"></div>
             </div>
 
-            <div class="form-group">
-              <label>วันที่ล้างแอร์ล่าสุด <span style="color: var(--danger);">*</span></label>
-              <input type="date" id="acLogDate" class="form-control" required>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>📅 วันที่ล้างแอร์ (เลือกใส่วันที่ย้อนหลังได้อิสระ) <span style="color: var(--danger);">*</span></label>
+              <input type="date" id="acLogDate" class="form-control" required style="font-size: 15px; font-weight: 600;">
+              <span class="input-hint">สามารถเลือกวันที่ในอดีตย้อนหลังได้ เพื่อบันทึกประวัติว่าครั้งล่าสุดคือเมื่อไหร่</span>
             </div>
 
             <div class="form-group">
@@ -2004,7 +2095,7 @@
 
             <div class="form-group">
               <label>ช่างผู้ดูแล / ร้านแอร์</label>
-              <input type="text" id="acLogTechnician" class="form-control" placeholder="เช่น ช่างบอย, ร้านสยามแอร์ (ไม่บังคับ)">
+              <input type="text" id="acLogTechnician" class="form-control" placeholder="เช่น ช่างบอย, ร้านแอร์ (ไม่บังคับ)">
             </div>
 
             <div class="form-group">
@@ -2014,7 +2105,7 @@
 
             <div class="form-group" style="grid-column: 1 / -1;">
               <label>หมายเหตุ / รายละเอียดเพิ่มเติม</label>
-              <textarea id="acLogNote" class="form-control" rows="2" placeholder="เช่น ล้างใหญ่เรียบร้อย ลมแรงปกติ (ไม่บังคับ)"></textarea>
+              <textarea id="acLogNote" class="form-control" rows="2" placeholder="เช่น ล้างใหญ่ คอยล์ร้อน-เย็น ลมแรงปกติ (ไม่บังคับ)"></textarea>
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">
@@ -2031,7 +2122,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modalLogACClean')">ยกเลิก</button>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('formACLog').requestSubmit()">💾 บันทึกวันที่ล้างแอร์</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('formACLog').requestSubmit()">💾 บันทึกประวัติการล้างแอร์</button>
       </div>
     </div>
   </div>
@@ -2083,6 +2174,9 @@
     let calCurrentYear = new Date().getFullYear();
     let calCurrentMonth = new Date().getMonth();
     let selectedCalDayStr = '';
+    let currentHouseCalUnitId = null;
+    let houseCalCurrentYear = new Date().getFullYear();
+    let houseCalCurrentMonth = new Date().getMonth();
     let addImgFiles = [];
     let issueImgFiles = [];
     let editImgFiles = [];
@@ -2274,6 +2368,9 @@
         renderACTrackerCards();
         renderCalendar();
         updateACKpis();
+        if (currentHouseCalUnitId && document.getElementById('modalHouseCalendar')?.classList.contains('active')) {
+          renderHouseCalendarModalContent(currentHouseCalUnitId);
+        }
       }, err => {
         console.error('AC Units sync error:', err);
       });
@@ -2289,6 +2386,9 @@
         renderACHistoryTable();
         renderCalendar();
         updateACKpis();
+        if (currentHouseCalUnitId && document.getElementById('modalHouseCalendar')?.classList.contains('active')) {
+          renderHouseCalendarModalContent(currentHouseCalUnitId);
+        }
       }, err => {
         console.error('AC Logs sync error:', err);
       });
@@ -3885,10 +3985,15 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: 14px; border: 1px solid var(--border);">
-            <div style="font-size: 36px; margin-bottom: 8px;">❄️</div>
-            <div style="font-weight: 700; font-size: 16px; color: #334155;">ยังไม่มีรายการห้อง / วันที่ล้างแอร์</div>
-            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; margin-bottom: 16px;">กดปุ่มด้านล่างเพื่อลงบันทึกวันที่ล้างแอร์ล่าสุดของแต่ละห้องได้ทันที</div>
-            <button class="btn btn-primary btn-sm" onclick="openLogACCleanModal()">❄️ ลงบันทึกวันที่ล้างแอร์ล่าสุด</button>
+            <div style="font-size: 38px; margin-bottom: 8px;">🏠</div>
+            <div style="font-weight: 700; font-size: 17px; color: #334155;">ยังไม่มีรายการบ้านพักในระบบ</div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; margin-bottom: 18px;">
+              ท่านสามารถกดสร้างบ้านตัวอย่าง (บ้าน 1 - บ้าน 5) หรือเพิ่มบ้านพักใหม่เพื่อเริ่มบันทึกการล้างแอร์ได้ทันที
+            </div>
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="createSampleHouses()">⚡ สร้างบ้านตัวอย่าง (บ้าน 1-5)</button>
+              <button class="btn btn-primary" onclick="openAddACUnitModal()">➕ เพิ่มบ้านพักใหม่</button>
+            </div>
           </div>
         `;
         return;
@@ -3914,43 +4019,55 @@
           barColor = '#f59e0b';
         }
 
+        const lastCleanedText = u.last_cleaned ? `${formatThaiDate(u.last_cleaned)} (${daysPassed} วันที่แล้ว)` : 'ยังไม่มีบันทึก';
+        const nextDueText = u.next_due ? formatThaiDate(u.next_due) : '-';
+
         return `
-          <div class="ac-card">
-            <div class="ac-card-header">
-              <div>
-                <div class="ac-card-title">❄️ ${escapeHtml(u.room)}</div>
-                <div class="ac-card-sub">${u.brand_btu ? escapeHtml(u.brand_btu) : 'แอร์ประจำห้อง'}</div>
+          <div class="ac-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="ac-card-header">
+                <div>
+                  <div class="ac-card-title">🏠 ${escapeHtml(u.room)}</div>
+                  <div class="ac-card-sub">${u.brand_btu ? escapeHtml(u.brand_btu) : 'เครื่องปรับอากาศ'}</div>
+                </div>
+                <span class="ac-status-badge ${statusClass}">${statusText}</span>
               </div>
-              <span class="ac-status-badge ${statusClass}">${statusText}</span>
+
+              <div class="ac-meter">
+                <div class="ac-meter-bar" style="width: ${pct}%; background: ${barColor};"></div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:6px; background:#f8fafc; padding:10px 12px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px;">
+                <div class="ac-info-row">
+                  <span>❄️ ล้างล่าสุดเมื่อ:</span>
+                  <strong style="color:var(--primary); font-size:13px;">${lastCleanedText}</strong>
+                </div>
+                <div class="ac-info-row">
+                  <span>📅 กำหนดรอบถัดไป:</span>
+                  <strong style="color: ${remaining <= 0 ? 'var(--danger)' : '#166534'}; font-size:13px;">${nextDueText}</strong>
+                </div>
+              </div>
+
+              ${u.note ? `<div style="font-size:11.5px; color:var(--text-muted); background:#f1f5f9; padding:6px 10px; border-radius:6px; margin-bottom:10px;">"${escapeHtml(u.note)}"</div>` : ''}
             </div>
 
-            <div class="ac-meter">
-              <div class="ac-meter-bar" style="width: ${pct}%; background: ${barColor};"></div>
-            </div>
+            <div>
+              <!-- Large Prominent Action: Open House Calendar & Back-dates -->
+              <button class="btn btn-primary" style="width:100%; margin-top:6px; font-weight:700; box-shadow:0 3px 10px rgba(37,99,235,0.22); display:flex; align-items:center; justify-content:center; gap:6px; padding:10px;" onclick="openHouseCalendarModal('${u.id}')">
+                📅 ปฏิทินบ้านหลังนี้ & บันทึกย้อนหลัง
+              </button>
 
-            <div style="display:flex; flex-direction:column; gap:6px;">
-              <div class="ac-info-row">
-                <span>วันที่ล้างล่าสุด:</span>
-                <strong style="color:var(--primary);">${formatThaiDate(u.last_cleaned)} (${daysPassed} วันที่แล้ว)</strong>
+              <div style="display:flex; gap:6px; margin-top:8px;">
+                <button class="btn btn-success btn-sm" style="flex:1;" onclick="quickMarkACCleaned('${u.id}')" title="บันทึกว่าเพิ่งล้างเรียบร้อยในวันนี้">
+                  ✅ เพิ่งล้างวันนี้
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="openAddACUnitModal('${u.id}')" title="แก้ไขข้อมูลบ้านพัก">
+                  ✏️ แก้ไข
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteACUnit('${u.id}', '${escapeHtml(u.room)}')" title="ลบบ้านนี้">
+                  🗑️
+                </button>
               </div>
-              <div class="ac-info-row">
-                <span>กำหนดรอบถัดไป (90 วัน):</span>
-                <strong style="color: ${remaining <= 0 ? 'var(--danger)' : 'var(--text)'};">${formatThaiDate(u.next_due)}</strong>
-              </div>
-            </div>
-
-            ${u.note ? `<div style="font-size:11.5px; color:var(--text-muted); background:#f8fafc; padding:6px 10px; border-radius:6px; margin-top:4px;">"${escapeHtml(u.note)}"</div>` : ''}
-
-            <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
-              <button class="btn btn-success btn-sm" style="flex:1;" onclick="quickMarkACCleaned('${u.id}')" title="บันทึกว่าล้างเรียบร้อยแล้วในวันนี้">
-                ✅ เพิ่งล้างวันนี้
-              </button>
-              <button class="btn btn-outline btn-sm" onclick="openLogACCleanModal('${u.last_cleaned}', '${escapeHtml(u.room)}')" title="เปลี่ยนวันที่ล้างล่าสุด">
-                📅 เปลี่ยนวันที่ล้าง
-              </button>
-              <button class="btn btn-danger btn-sm" onclick="confirmDeleteACUnit('${u.id}', '${escapeHtml(u.room)}')" title="ลบห้องนี้">
-                🗑️
-              </button>
             </div>
           </div>
         `;
@@ -3995,8 +4112,366 @@
 
         playBeep('success');
         showToast(`บันทึกวันที่ล้างแอร์ล่าสุดของ "${u.room}" สำเร็จ! รอบถัดไปคือ ${formatThaiDate(nextDue)} ❄️`, 'success');
+
+        if (currentHouseCalUnitId === unitId) {
+          renderHouseCalendarModalContent(unitId);
+        }
       } catch (err) {
         showToast(`บันทึกล้มเหลว: ${err.message}`, 'error');
+      }
+    }
+
+    /* --- CREATE SAMPLE HOUSES (บ้าน 1 - บ้าน 5) --- */
+    async function createSampleHouses() {
+      if (acUnits.length > 0) {
+        if (!confirm('มีรายการบ้านพักในระบบแล้ว ต้องการสร้างบ้านตัวอย่างเพิ่มเติม (บ้าน 1 - บ้าน 5) ใช่หรือไม่?')) return;
+      }
+      try {
+        const today = new Date();
+        const formatDate = (daysAgo) => {
+          const d = new Date(today);
+          d.setDate(d.getDate() - daysAgo);
+          return d.toISOString().slice(0, 10);
+        };
+
+        const samples = [
+          { room: 'บ้าน 1 (ริมน้ำ)', btu: 'Daikin 18,000 BTU', daysAgo: 10, note: 'เพิ่งล้างใหญ่ ฟิลเตอร์สะอาด' },
+          { room: 'บ้าน 2 (วิวสวน)', btu: 'Mitsubishi 12,000 BTU', daysAgo: 35, note: 'เช็คน้ำยาแอร์แล้ว ปกติดี' },
+          { room: 'บ้าน 3 (แฟมิลี่)', btu: 'Carrier 24,000 BTU', daysAgo: 78, note: 'ใกล้ครบรอบ 90 วัน' },
+          { room: 'บ้าน 4 (พูลวิลล่า)', btu: 'Panasonic 18,000 BTU', daysAgo: 98, note: 'เกินกำหนด 90 วันแล้ว ต้องล้างด่วน' },
+          { room: 'บ้าน 5 (การ์เด้น)', btu: 'Daikin 12,000 BTU', daysAgo: 50, note: 'ห้องนอนใหญ่ ล้างคอยล์เย็นแล้ว' }
+        ];
+
+        const batch = db.batch();
+        for (const s of samples) {
+          const lastCleaned = formatDate(s.daysAgo);
+          const nextDue = addDaysToDate(lastCleaned, 90);
+          const unitRef = db.collection(`${collectionPrefix}_ac_units`).doc();
+          batch.set(unitRef, {
+            room: s.room,
+            brand_btu: s.btu,
+            last_cleaned: lastCleaned,
+            cycle_days: 90,
+            next_due: nextDue,
+            note: s.note,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          // Also create an initial cleaning log for each
+          const logRef = db.collection(`${collectionPrefix}_ac_logs`).doc();
+          batch.set(logRef, {
+            unit_id: unitRef.id,
+            room: s.room,
+            date: lastCleaned,
+            type: 'ล้างใหญ่',
+            status: 'completed',
+            technician: 'ช่างศักดิ์ แอร์เซอร์วิส',
+            cost: 500,
+            note: s.note,
+            images: [],
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+
+        await batch.commit();
+        playBeep('success');
+        showToast('สร้างบ้านตัวอย่าง (บ้าน 1 - บ้าน 5) สำเร็จเรียบร้อย! 🎉', 'success');
+      } catch (err) {
+        showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      }
+    }
+
+    /* --- DEDICATED HOUSE CALENDAR & HISTORY MODAL --- */
+    function openHouseCalendarModal(unitId) {
+      const u = acUnits.find(x => x.id === unitId);
+      if (!u) {
+        showToast('ไม่พบข้อมูลบ้านพักนี้', 'error');
+        return;
+      }
+      currentHouseCalUnitId = unitId;
+
+      if (u.last_cleaned) {
+        const d = new Date(u.last_cleaned);
+        if (!isNaN(d.getTime())) {
+          houseCalCurrentYear = d.getFullYear();
+          houseCalCurrentMonth = d.getMonth();
+        }
+      } else {
+        const now = new Date();
+        houseCalCurrentYear = now.getFullYear();
+        houseCalCurrentMonth = now.getMonth();
+      }
+
+      renderHouseCalendarModalContent(unitId);
+      openModal('modalHouseCalendar');
+    }
+
+    function renderHouseCalendarModalContent(unitId) {
+      const u = acUnits.find(x => x.id === unitId);
+      if (!u) return;
+
+      const roomNameEl = document.getElementById('houseCalRoomName');
+      if (roomNameEl) roomNameEl.textContent = u.room;
+
+      // Filter all cleaning logs for this house
+      const houseLogs = acLogs.filter(l => (l.unit_id === u.id) || (l.room && l.room.toLowerCase() === u.room.toLowerCase()));
+      houseLogs.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+      // Determine true latest cleaning date
+      const latestDateFromLogs = houseLogs.length > 0 ? houseLogs[0].date : null;
+      const trueLatestDate = [latestDateFromLogs, u.last_cleaned].filter(Boolean).sort().reverse()[0] || null;
+
+      // Status Ribbon
+      const lastCleanedEl = document.getElementById('houseCalLastCleanedDate');
+      const nextDueEl = document.getElementById('houseCalNextDueText');
+      const cycleDays = u.cycle_days || 90;
+
+      if (trueLatestDate) {
+        const daysPassed = getDaysDiffFromToday(trueLatestDate);
+        const nextDue = addDaysToDate(trueLatestDate, cycleDays);
+        const remaining = cycleDays - daysPassed;
+
+        if (lastCleanedEl) {
+          lastCleanedEl.innerHTML = `<strong style="font-size:15px; color:#14532d;">${formatThaiDate(trueLatestDate)}</strong> (${daysPassed} วันที่แล้ว)`;
+        }
+        if (nextDueEl) {
+          let dueBadge = remaining <= 0
+            ? `<span style="color:#dc2626; font-weight:700;">🔴 ถึงรอบล้างแล้ว (เกิน ${Math.abs(remaining)} วัน)</span>`
+            : (remaining <= 15
+                ? `<span style="color:#d97706; font-weight:600;">🟡 ใกล้ถึงรอบ (เหลือ ${remaining} วัน)</span>`
+                : `<span style="color:#15803d; font-weight:600;">🟢 ปกติ (เหลือ ${remaining} วัน)</span>`);
+          nextDueEl.innerHTML = `📅 กำหนดรอบถัดไป (${cycleDays} วัน): <strong style="color:#15803d;">${formatThaiDate(nextDue)}</strong> • ${dueBadge}`;
+        }
+      } else {
+        if (lastCleanedEl) lastCleanedEl.textContent = 'ยังไม่มีประวัติการล้าง';
+        if (nextDueEl) nextDueEl.textContent = '📅 แนะนำให้กดปุ่มลงบันทึกเพื่อกำหนดรอบ 90 วัน';
+      }
+
+      // Render calendar grid and history list
+      renderHouseCalendarGrid(u, houseLogs, trueLatestDate);
+      renderHouseHistoryList(u, houseLogs, trueLatestDate);
+    }
+
+    function renderHouseCalendarGrid(u, houseLogs, trueLatestDate) {
+      const titleEl = document.getElementById('houseCalMonthTitle');
+      const gridEl = document.getElementById('houseCalDaysGrid');
+      if (!gridEl) return;
+
+      const y = houseCalCurrentYear;
+      const m = houseCalCurrentMonth;
+      if (titleEl) {
+        titleEl.textContent = `🗓️ ${MONTHS_FULL_TH[m + 1]} ${y + 543}`;
+      }
+
+      const firstDay = new Date(y, m, 1).getDay();
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const daysInPrevMonth = new Date(y, m, 0).getDate();
+      const todayStr = getTodayString();
+      const cycleDays = (u && u.cycle_days) || 90;
+      const calculatedNextDue = trueLatestDate ? addDaysToDate(trueLatestDate, cycleDays) : (u && u.next_due);
+
+      gridEl.innerHTML = '';
+
+      const createCell = (dayNum, dateStr, isOtherMonth) => {
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell' + (isOtherMonth ? ' other-month' : '') + (dateStr === todayStr ? ' today' : '');
+        cell.style.cursor = 'pointer';
+        cell.title = `คลิกเพื่อลงบันทึกวันที่ ${formatThaiDate(dateStr)}`;
+        cell.onclick = () => openLogForCurrentHouse(dateStr);
+
+        const header = document.createElement('div');
+        header.className = 'cal-cell-header';
+        header.innerHTML = `<span class="cal-cell-num">${dayNum}</span>`;
+        cell.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className = 'cal-event-list';
+
+        // Check if cleaned on this date
+        const matchedLog = houseLogs ? houseLogs.find(l => l.date === dateStr) : null;
+        const isCleanedDate = Boolean(matchedLog || (u && u.last_cleaned === dateStr));
+        const isLatest = (dateStr === trueLatestDate);
+
+        if (isCleanedDate) {
+          const chip = document.createElement('div');
+          chip.className = 'cal-chip cleaned';
+          chip.style.fontSize = '11px';
+          chip.style.fontWeight = '700';
+          if (isLatest) {
+            chip.style.background = '#15803d';
+            chip.style.color = '#ffffff';
+            chip.innerHTML = `<span>🌟</span> <span>ล้างล่าสุด</span>`;
+          } else {
+            chip.innerHTML = `<span>❄️</span> <span>ล้างแอร์</span>`;
+          }
+          list.appendChild(chip);
+        }
+
+        // Check if due on this date
+        if (calculatedNextDue && calculatedNextDue === dateStr && !isCleanedDate) {
+          const dueChip = document.createElement('div');
+          dueChip.className = 'cal-chip due';
+          dueChip.style.fontSize = '11px';
+          dueChip.innerHTML = `<span>⏰</span> <span>ครบ 90 วัน</span>`;
+          list.appendChild(dueChip);
+        }
+
+        cell.appendChild(list);
+        return cell;
+      };
+
+      // Trailing days prev month
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const dayNum = daysInPrevMonth - i;
+        const prevDate = new Date(y, m - 1, dayNum);
+        const mm = String(prevDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(dayNum).padStart(2, '0');
+        const dateStr = `${prevDate.getFullYear()}-${mm}-${dd}`;
+        gridEl.appendChild(createCell(dayNum, dateStr, true));
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const mm = String(m + 1).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        const dateStr = `${y}-${mm}-${dd}`;
+        gridEl.appendChild(createCell(d, dateStr, false));
+      }
+
+      // Leading days next month
+      const total = firstDay + daysInMonth;
+      const rem = (7 - (total % 7)) % 7;
+      for (let j = 1; j <= rem; j++) {
+        const nextDate = new Date(y, m + 1, j);
+        const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(j).padStart(2, '0');
+        const dateStr = `${nextDate.getFullYear()}-${mm}-${dd}`;
+        gridEl.appendChild(createCell(j, dateStr, true));
+      }
+    }
+
+    function prevHouseCalMonth() {
+      houseCalCurrentMonth--;
+      if (houseCalCurrentMonth < 0) {
+        houseCalCurrentMonth = 11;
+        houseCalCurrentYear--;
+      }
+      if (currentHouseCalUnitId) renderHouseCalendarModalContent(currentHouseCalUnitId);
+    }
+
+    function nextHouseCalMonth() {
+      houseCalCurrentMonth++;
+      if (houseCalCurrentMonth > 11) {
+        houseCalCurrentMonth = 0;
+        houseCalCurrentYear++;
+      }
+      if (currentHouseCalUnitId) renderHouseCalendarModalContent(currentHouseCalUnitId);
+    }
+
+    function todayHouseCalMonth() {
+      const now = new Date();
+      houseCalCurrentYear = now.getFullYear();
+      houseCalCurrentMonth = now.getMonth();
+      if (currentHouseCalUnitId) renderHouseCalendarModalContent(currentHouseCalUnitId);
+    }
+
+    function renderHouseHistoryList(u, houseLogs, trueLatestDate) {
+      const listEl = document.getElementById('houseCalHistoryList');
+      const countEl = document.getElementById('houseCalLogCount');
+      if (!listEl) return;
+
+      if (countEl) countEl.textContent = `${houseLogs.length} รายการ`;
+
+      if (houseLogs.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 22px; background: #f8fafc; border-radius: 10px; border: 1px dashed var(--border);">
+            <div style="font-size: 24px; margin-bottom: 4px;">❄️</div>
+            <div style="font-weight: 600; font-size: 13.5px; color: #475569;">ยังไม่มีประวัติการล้างแอร์ย้อนหลังของบ้านหลังนี้</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+              กดปุ่ม <strong>"❄️ ลงบันทึกล้างแอร์ (ใส่วันที่ย้อนหลังได้)"</strong> หรือคลิกวันที่ในปฏิทินเพื่อบันทึก
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = houseLogs.map((l, idx) => {
+        const isLatest = (l.date === trueLatestDate);
+        const daysAgo = getDaysDiffFromToday(l.date);
+        const daysAgoText = daysAgo === 0 ? 'วันนี้' : (daysAgo > 0 ? `${daysAgo} วันที่แล้ว` : `อีก ${Math.abs(daysAgo)} วัน`);
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:${isLatest ? '#f0fdf4' : 'white'}; border:1px solid ${isLatest ? '#86efac' : 'var(--border)'}; border-radius:10px; padding:10px 14px; gap:10px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="font-size:20px;">❄️</div>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-weight:700; font-size:14px; color:${isLatest ? '#15803d' : 'var(--text)'};">
+                    ${formatThaiDate(l.date)}
+                  </span>
+                  <span style="font-size:12px; color:var(--text-muted);">(${daysAgoText})</span>
+                  ${isLatest ? '<span class="badge" style="background:#16a34a; color:white; font-size:10.5px; padding:2px 8px; border-radius:6px;">🌟 ครั้งล่าสุด</span>' : ''}
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                  ${l.technician ? `ช่าง: <strong style="color:#334155;">${escapeHtml(l.technician)}</strong> • ` : ''}
+                  ${l.cost > 0 ? `ค่าบริการ: <strong style="color:#334155;">฿${formatNumber(l.cost, 2)}</strong> • ` : ''}
+                  ${escapeHtml(l.type || 'ล้างแอร์')}
+                  ${l.note ? ` • <span style="font-style:italic;">"${escapeHtml(l.note)}"</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-outline btn-sm" style="color:var(--danger); border-color:#fca5a5; padding:4px 8px; font-size:12px;" onclick="deleteHouseACLog('${l.id}')" title="ลบรายการบันทึกนี้">
+                🗑️ ลบ
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openLogForCurrentHouse(selectedDate = null) {
+      if (!currentHouseCalUnitId) {
+        openLogACCleanModal(selectedDate);
+        return;
+      }
+      const u = acUnits.find(x => x.id === currentHouseCalUnitId);
+      openLogACCleanModal(selectedDate || getTodayString(), u ? u.room : null);
+    }
+
+    async function quickCleanCurrentHouse() {
+      if (!currentHouseCalUnitId) return;
+      await quickMarkACCleaned(currentHouseCalUnitId);
+      renderHouseCalendarModalContent(currentHouseCalUnitId);
+    }
+
+    async function deleteHouseACLog(logId) {
+      if (!confirm('ยืนยันการลบประวัติการล้างแอร์รายการนี้ใช่หรือไม่?')) return;
+      try {
+        const u = acUnits.find(x => x.id === currentHouseCalUnitId);
+        await db.collection(`${collectionPrefix}_ac_logs`).doc(logId).delete();
+
+        if (u) {
+          const remainingLogs = acLogs.filter(l => l.id !== logId && ((l.unit_id === u.id) || (l.room && l.room.toLowerCase() === u.room.toLowerCase())));
+          const maxDate = remainingLogs.map(l => l.date).sort().reverse()[0] || '';
+          const cycleDays = u.cycle_days || 90;
+          const nextDue = maxDate ? addDaysToDate(maxDate, cycleDays) : '';
+
+          await db.collection(`${collectionPrefix}_ac_units`).doc(u.id).update({
+            last_cleaned: maxDate,
+            next_due: nextDue,
+            updated_at: new Date().toISOString()
+          });
+        }
+
+        playBeep('warning');
+        showToast('ลบประวัติและคำนวณวันล่าสุดใหม่เรียบร้อย', 'success');
+
+        if (currentHouseCalUnitId) {
+          renderHouseCalendarModalContent(currentHouseCalUnitId);
+        }
+      } catch (err) {
+        showToast(`ลบล้มเหลว: ${err.message}`, 'error');
       }
     }
 
@@ -4060,11 +4535,10 @@
         return;
       }
       if (!date) {
-        showToast('กรุณาเลือกวันที่ล้างแอร์ล่าสุด', 'warning');
+        showToast('กรุณาเลือกวันที่ล้างแอร์', 'warning');
         return;
       }
 
-      const nextDue = addDaysToDate(date, cycleDays);
       let unit = acUnits.find(u => u.room.toLowerCase() === roomInput.toLowerCase());
 
       try {
@@ -4072,10 +4546,17 @@
         const batch = db.batch();
 
         let unitId = unit ? unit.id : null;
+
+        // Calculate true latest cleaning date
+        const existingLogs = acLogs.filter(l => (unit && l.unit_id === unit.id) || (l.room && l.room.toLowerCase() === roomInput.toLowerCase()));
+        const allDates = [date, ...existingLogs.map(l => l.date), (unit ? unit.last_cleaned : null)].filter(Boolean);
+        const trueLatestDate = allDates.sort().reverse()[0] || date;
+        const nextDue = addDaysToDate(trueLatestDate, cycleDays);
+
         if (unit) {
           const unitRef = db.collection(`${collectionPrefix}_ac_units`).doc(unit.id);
           batch.update(unitRef, {
-            last_cleaned: date,
+            last_cleaned: trueLatestDate,
             cycle_days: cycleDays,
             next_due: nextDue,
             updated_at: new Date().toISOString()
@@ -4086,7 +4567,7 @@
           batch.set(newUnitRef, {
             room: roomInput,
             brand_btu: '',
-            last_cleaned: date,
+            last_cleaned: trueLatestDate,
             cycle_days: cycleDays,
             next_due: nextDue,
             note: note || '',
@@ -4099,11 +4580,11 @@
           unit_id: unitId,
           room: roomInput,
           date,
-          type: 'ล้างแอร์ล่าสุด',
+          type: 'ล้างแอร์',
           status: 'completed',
           technician,
           cost,
-          note: note || `บันทึกวันที่ล้างแอร์ล่าสุด (รอบถัดไป: ${formatThaiDate(nextDue)})`,
+          note: note || `บันทึกการล้างแอร์ (${formatThaiDate(date)})`,
           images: imageUrls,
           created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -4111,8 +4592,12 @@
         await batch.commit();
 
         playBeep('success');
-        showToast(`บันทึกวันที่ล้างแอร์ล่าสุดของ "${roomInput}" สำเร็จ! (รอบถัดไป ${formatThaiDate(nextDue)}) ❄️`, 'success');
+        showToast(`บันทึกการล้างแอร์ "${roomInput}" สำเร็จ! (รอบถัดไป ${formatThaiDate(nextDue)}) ❄️`, 'success');
         closeModal('modalLogACClean');
+
+        if (currentHouseCalUnitId) {
+          renderHouseCalendarModalContent(currentHouseCalUnitId);
+        }
       } catch (err) {
         showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
       }
@@ -4165,8 +4650,23 @@
       if (!confirm(`ต้องการลบรายการบันทึกของ "${room}" ใช่หรือไม่?`)) return;
       try {
         await db.collection(`${collectionPrefix}_ac_logs`).doc(logId).delete();
+
+        // Also recompute unit's last_cleaned if unit exists
+        const unit = acUnits.find(u => u.room.toLowerCase() === (room || '').toLowerCase());
+        if (unit) {
+          const remainingLogs = acLogs.filter(l => l.id !== logId && ((l.unit_id === unit.id) || (l.room && l.room.toLowerCase() === room.toLowerCase())));
+          const maxDate = remainingLogs.map(l => l.date).sort().reverse()[0] || '';
+          const cycleDays = unit.cycle_days || 90;
+          const nextDue = maxDate ? addDaysToDate(maxDate, cycleDays) : '';
+          await db.collection(`${collectionPrefix}_ac_units`).doc(unit.id).update({
+            last_cleaned: maxDate,
+            next_due: nextDue,
+            updated_at: new Date().toISOString()
+          });
+        }
+
         playBeep('warning');
-        showToast('ลบรายการบันทึกเรียบร้อย', 'success');
+        showToast('ลบรายการบันทึกและคำนวณวันล่าสุดใหม่เรียบร้อย', 'success');
       } catch (err) {
         showToast(`ลบล้มเหลว: ${err.message}`, 'error');
       }
