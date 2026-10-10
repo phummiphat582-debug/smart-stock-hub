@@ -1,7 +1,5 @@
-const CACHE_NAME = 'smart-stock-hub-v2';
+const CACHE_NAME = 'smart-stock-hub-v5';
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -29,6 +27,7 @@ self.addEventListener('activate', (e) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('Removing old cache:', key);
             return caches.delete(key);
           }
         })
@@ -39,24 +38,42 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
-  // Firestore / Google APIs should go through network
+  // Firestore / Google APIs should go through network directly
   if (e.request.url.includes('firestore.googleapis.com')) return;
 
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      return (
-        cached ||
-        fetch(e.request)
-          .then((response) => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
+  // HTML navigation requests: ALWAYS NETWORK FIRST so updates are immediately visible!
+  const isHtml = e.request.mode === 'navigate' || 
+                 (e.request.headers.get('accept') && e.request.headers.get('accept').includes('text/html')) ||
+                 e.request.url.endsWith('index.html') ||
+                 e.request.url.endsWith('/');
+
+  if (isHtml) {
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          if (response && response.status === 200) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy));
-            return response;
-          })
-          .catch(() => cached)
-      );
+          }
+          return response;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Static assets: Stale-While-Revalidate
+  e.respondWith(
+    caches.match(e.request).then((cached) => {
+      const fetchPromise = fetch(e.request).then((networkRes) => {
+        if (networkRes && networkRes.status === 200) {
+          const copy = networkRes.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy));
+        }
+        return networkRes;
+      }).catch(() => null);
+
+      return cached || fetchPromise;
     })
   );
 });
